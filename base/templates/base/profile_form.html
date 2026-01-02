@@ -1,0 +1,23 @@
+{% extends 'main.html' %}
+
+
+{% block content %}
+
+
+<h1>Actualizar Profile</h1>
+
+<div>
+    <form method = 'POST' action="">
+        {% csrf_token %}
+
+        {{form.as_p}}
+
+        <input type="submit" value="Actualizar" />
+
+    </form>
+
+    <a href="{{ request.META.HTTP_REFERER }}">Volver</a>
+
+</div>
+
+{% endblock content %}

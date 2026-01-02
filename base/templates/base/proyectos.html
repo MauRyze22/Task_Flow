@@ -1,0 +1,25 @@
+{% extends "main.html" %}
+
+{% block content %}
+
+<h1>Mis Proyectos</h1>
+
+{% for proyecto in proyectos %}
+   <div>
+        <ul> 
+            <li>Nombre:<a href="{% url 'proyecto_detail' proyecto.id %}">{{proyecto.name}}</a></li>
+
+        </ul>
+
+    </div>
+{% endfor %}
+
+{% if request.user.is_authenticated %}
+<div> 
+    <a href="{% url 'create_proyecto' %}">Crear Proyecto</a>
+</div>
+
+{% endif %}
+
+
+{% endblock content %}

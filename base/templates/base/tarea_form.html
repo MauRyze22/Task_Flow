@@ -1,0 +1,44 @@
+{% extends 'main.html' %}
+
+
+{% block content %}
+
+<h1>Crear Tarea</h1>
+
+<div>  
+    {% if page == 'crear'%} 
+    <div>
+        <form method = 'POST' action="">
+            {% csrf_token %}
+
+            {{form.as_p}}
+
+            <input type="submit" value = 'Crear' />
+        </form>
+
+        <a href="{{ request.META.HTTP_REFERER }}">Volver</a>
+
+    </div>
+
+    {% else %}
+
+    <div>
+        <form method = 'POST' action="">
+            {% csrf_token %}
+
+            {{form.as_p}}
+
+            <input type="submit" value = 'Actualizar'/>
+        </form>
+
+        <a href="{{ request.META.HTTP_REFERER }}">Volver</a>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+
+{% endblock content %}
+

@@ -1,0 +1,59 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+<div>
+    <div>
+        <h1> Bienvenido a Task Flow {{request.user.username}}</h1>
+
+        <p>En esta pagina podras ver todos tus equipos, proyectos, tareas y comentarios relacionados con estos. Esperamos que 
+        disfrutes de la pagina.
+        </p>
+
+    </div>
+
+    <div>
+
+        {% if comentarios %}
+        <h3>Comentarios mas Reciente</h3>
+
+        {% for comentario in comentarios %}
+            <ul>
+                <div>
+                    <li><a href="{% url 'profile_user' comentario.user.id %}">@{{comentario.user}}</a>: {{comentario.cuerpo}}</li>
+                    <small>Creado: hace {{comentario.created|timesince}}</small>
+                </div>
+            </ul>
+        {% endfor %}
+
+        {% endif %}
+
+    </div>
+
+
+    <div>
+
+        {% if tareas %}
+        <h3>Tareas cerca de vencerse</h3>
+
+        {% for tarea in tareas %}
+        <div>
+            {% if not tarea.esta_vencida and tarea.dias_para_vencer <= 3 %}
+
+                <ul>
+                    <li>{{tarea.contenido}}</li>
+                    <small>Vence: {{tarea.fecha_limite}}</small> 
+                </ul>
+
+            {% endif %}
+
+        </div>
+
+        {% endfor %}
+
+        {% endif %}
+    </div>
+
+</div>
+{% endblock content %}
+

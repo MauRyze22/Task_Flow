@@ -1,0 +1,37 @@
+{% extends "main.html" %}
+
+
+{% block content %}
+
+<h1>Equipo: {{equipo.numero}}</h1>
+
+<div>
+
+    <div>
+
+        <h3>Jefe: {{equipo.jefe}}</h3>
+
+        <p>Integrantes:</p>
+
+        {% for integrante in integrantes  %}
+
+                <div>
+                    <p><a href="{% url 'profile_user' integrante.id %}">{{integrante.username}}</a></p>
+                </div>
+
+        {% endfor %}
+
+        <p>Creado: hace {{equipo.created|timesince}}</p>
+
+        {% if equipo.jefe == request.user %}
+            <a href="{% url 'equipo_update' equipo.id %}">Editar</a>
+            <a href="{% url 'equipo_delete' equipo.id %}">Eliminar</a>
+        {% endif %}
+
+    </div>
+
+
+</div>
+
+
+{%endblock content %}
