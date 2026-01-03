@@ -128,7 +128,7 @@ def equipo_update(request, pk):
     equipo = get_object_or_404(Equipo, id = pk)
     form = EquipoForm(instance=equipo)
     
-    if request.user is not equipo.jefe:
+    if request.user != equipo.jefe:
         return HttpResponseForbidden("No puedes acceder a esta informacion")
 
     if request.method == 'POST':
@@ -147,7 +147,7 @@ def equipo_update(request, pk):
 def equipo_delete(request, pk):
     equipo = get_object_or_404(Equipo, id = pk)
 
-    if request.user not in equipo.integrantes.all():
+    if request.user.id is not equipo.jefe.id:
         return HttpResponseForbidden("No puedes acceder a esta informacion")
     
     if request.method == 'POST':
