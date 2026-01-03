@@ -62,6 +62,7 @@ def register_user(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         perfil_form = PerfilForm(request.POST)
+        
         if form.is_valid() and perfil_form.is_valid():
             user = form.save(commit=False)
             user.username = user.username.lower()
@@ -81,10 +82,6 @@ def register_user(request):
 @login_required(login_url='profile_user')
 def profile_user(request, pk):
     user = get_object_or_404(User, id=pk)
-        
-    if request.user != user:
-        return HttpResponseForbidden(request, 'No puedes acceder a un perfil de otro usuario')
-
     equipos_count = Equipo.objects.filter(Q(integrantes=request.user)|
                                           Q(jefe = request.user)).distinct().count()
     tareas_realizadas_count = user.tarea_set.filter(estado='realizada').count()
@@ -93,17 +90,17 @@ def profile_user(request, pk):
     context = {'user': user, 'perfil': perfil,
                'equipos_count': equipos_count,
                'tareas_realizadas': tareas_realizadas_count}
-        
+
     return render(request, 'base/profile_user.html', context)
 
 
 def actualizar_profile(request, pk):  
     perfil = get_object_or_404(Perfil, id=pk)
+    form = PerfilForm(instance = perfil)
+        
     if request.user != perfil.user:
         return HttpResponseForbidden("No puedes actualizar un perfil de otro usuario")  
     
-    form = PerfilForm(instance = perfil)
-        
     if request.method == 'POST':
         form = PerfilForm(request.POST, instance = perfil)
         if form.is_valid():
@@ -131,7 +128,7 @@ def equipo_update(request, pk):
     equipo = get_object_or_404(Equipo, id = pk)
     form = EquipoForm(instance=equipo)
     
-    if request.user not in equipo.integrantes.all():
+    if request.user is not equipo.jefe:
         return HttpResponseForbidden("No puedes acceder a esta informacion")
 
     if request.method == 'POST':
@@ -142,7 +139,7 @@ def equipo_update(request, pk):
         else:
             messages.error(request, 'Los datos no son validos')
 
-    context = {'form': form, 'page': page}
+    context = {'form': form, 'page': page, 'equipo':equipo}
     return render(request, 'base/equipo_form.html', context)
 
 
@@ -233,11 +230,11 @@ def create_proyecto(request):
     context = {'form': form, 'page': page}
     return render(request, 'base/proyecto_form.html', context)
 
-3
+
 def proyecto_detail(request, pk):
     proyecto = get_object_or_404(Proyecto, id = pk)
     
-    if request.user not in proyecto.equipo.integrantes.all() or request.user != proyecto.tutor:
+    if request.user not in proyecto.equipo.integrantes.all() and request.user != proyecto.tutor:
         return HttpResponseForbidden("No puedes acceder a esta informacion")
     
     context = {'proyecto': proyecto}
@@ -258,7 +255,7 @@ def proyecto_update(request, pk):
             form.save()
             return redirect('proyectos')
 
-    context = {'form': form}
+    context = {'form': form, 'proyecto':proyecto}
     return render(request, 'base/proyecto_form.html', context)
 
 
@@ -320,8 +317,7 @@ def create_tarea(request):
 
     if not request.user.is_staff:
         form.fields['asignado_a'].queryset = User.objects.filter(id = request.user.id)
-        
-    form.fields['proyecto'].queryset = Proyecto.objects.filter(Q(tutor = request.user)|
+        form.fields['proyecto'].queryset = Proyecto.objects.filter(Q(tutor = request.user)|
                                                          Q(equipo__integrantes = request.user)).distinct()
     context = {'form': form, 'page': page}
     return render(request, 'base/tarea_form.html', context)
@@ -330,7 +326,7 @@ def create_tarea(request):
 def tarea_detail(request, pk):
     tarea = get_object_or_404(Tarea, id = pk)
     
-    if request.user not in tarea.proyecto.equipo.integrantes.all() or request.user != tarea.asignado_a:
+    if request.user not in tarea.proyecto.equipo.integrantes.all() and request.user != tarea.asignado_a:
         return HttpResponseForbidden("No puedes acceder a esta informacion")
     
     context = {'tarea': tarea}
@@ -352,7 +348,7 @@ def tarea_update(request, pk):
             form.save()
             return redirect('tareas')
 
-    context = {'form': form}
+    context = {'form': form, 'tarea':tarea, 'proyecto': tarea.proyecto}
     return render(request, 'base/proyecto_form.html', context)
 
 

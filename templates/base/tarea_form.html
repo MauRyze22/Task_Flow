@@ -1,0 +1,100 @@
+{% extends "main.html" %}
+
+{% block title %}{% if page == 'crear' %}Crear Tarea{% else %}Editar Tarea{% endif %}{% endblock %}
+{% block page_title %}{% if page == 'crear' %}Nueva Tarea{% else %}Editar Tarea{% endif %}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="dashboard-card">
+            <div class="d-flex align-items-center mb-4">
+                <div class="icon-task me-3">
+                    <i class="bi bi-check-circle-fill"></i>
+                </div>
+                <div>
+                    <h5 class="mb-0">{% if page == 'crear' %}Crear Nueva Tarea{% else %}Modificar Tarea{% endif %}</h5>
+                    <p class="text-muted mb-0">{% if page == 'crear' %}Asigna una nueva tarea{% else %}Actualiza la información de la tarea{% endif %}</p>
+                </div>
+            </div>
+            
+            {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-4" role="alert">
+                <i class="bi bi-exclamation-circle me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+            
+            <form method="POST">
+                {% csrf_token %}
+                
+                <div class="row">
+                    {% for field in form %}
+                    <div class="{% if field.name == 'contenido' or field.name == 'descripcion' %}col-12{% else %}col-md-6{% endif %} mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label fw-bold">
+                            {{ field.label }}
+                            {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
+                        </label>
+                        {{ field }}
+                        {% if field.help_text %}
+                        <div class="form-text">{{ field.help_text }}</div>
+                        {% endif %}
+                        {% if field.errors %}
+                        <div class="text-danger small mt-1">
+                            {{ field.errors }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                
+                <div class="alert alert-info mt-3">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Nota:</strong> Solo puedes crear tareas en proyectos donde participes o seas tutor.
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                    <a href="{% if page != 'crear' %}{% url 'tarea_detail' tarea.id %}{% else %}{{ request.META.HTTP_REFERER }}{% endif %}" class="btn btn-outline-secondary">
+                        <i class="bi bi-arrow-left me-1"></i> Cancelar
+                    </a>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-{% if page == 'crear' %}plus-circle{% else %}check-circle{% endif %} me-1"></i>
+                        {% if page == 'crear' %}Crear Tarea{% else %}Actualizar{% endif %}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Estilos específicos para formularios */
+    input, select, textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        transition: all 0.3s;
+        font-size: 14px;
+    }
+    
+    input:focus, select:focus, textarea:focus {
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
+        outline: none;
+    }
+    
+    textarea {
+        min-height: 120px;
+        resize: vertical;
+    }
+    
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 8px;
+        color: #495057;
+    }
+</style>
+{% endblock %}

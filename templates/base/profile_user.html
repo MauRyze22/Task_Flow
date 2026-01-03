@@ -1,0 +1,151 @@
+{% extends 'main.html' %}
+
+{% block title %}Perfil de {{ user.username }}{% endblock %}
+{% block page_title %}Perfil de Usuario{% endblock %}
+{% block page_subtitle %}{{ user.username }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-4 mb-4">
+        <!-- Tarjeta de perfil -->
+        <div class="dashboard-card text-center">
+            <div class="mb-3">
+                <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 100px; height: 100px;">
+                    <span class="text-white display-4">{{ user.username|first|upper }}</span>
+                </div>
+            </div>
+            
+            <h4>{{ user.username }}</h4>
+            <p class="text-muted">{{ perfil.rol|default:"Usuario" }}</p>
+            
+            <div class="mt-4">
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Miembro desde:</span>
+                    <strong>{{ user.date_joined|date:"d M Y" }}</strong>
+                </div>
+                <div class="d-flex justify-content-between mb-2">
+                    <span>Último acceso:</span>
+                    <strong>{{ user.last_login|date:"d M Y" }}</strong>
+                </div>
+            </div>
+            
+            {% if request.user == user %}
+            <div class="mt-4">
+                <a href="{% url 'actualizar_profile' perfil.id %}" class="btn btn-primary">
+                    <i class="bi bi-pencil-square"></i> Editar Perfil
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="col-lg-8">
+        <!-- Información detallada -->
+        <div class="dashboard-card">
+            <h5><i class="bi bi-info-circle me-2"></i>Información Personal</h5>
+            
+            <div class="row mt-4">
+                <div class="col-md-6 mb-3">
+                    <div class="p-3 border rounded">
+                        <small class="text-muted">Email</small>
+                        <p class="mb-0 fw-bold">
+                            <i class="bi bi-envelope me-2 text-primary"></i>
+                            {{ perfil.email|default:"No especificado" }}
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <div class="p-3 border rounded">
+                        <small class="text-muted">Teléfono</small>
+                        <p class="mb-0 fw-bold">
+                            <i class="bi bi-phone me-2 text-primary"></i>
+                            {{ perfil.numero|default:"No especificado" }}
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <div class="p-3 border rounded">
+                        <small class="text-muted">País</small>
+                        <p class="mb-0 fw-bold">
+                            <i class="bi bi-globe me-2 text-primary"></i>
+                            {{ perfil.pais|default:"No especificado" }}
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="col-md-6 mb-3">
+                    <div class="p-3 border rounded">
+                        <small class="text-muted">Rol Principal</small>
+                        <p class="mb-0 fw-bold">
+                            <i class="bi bi-person-badge me-2 text-primary"></i>
+                            {{ perfil.rol|default:"No especificado" }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Estadísticas -->
+        <div class="row mt-4">
+            <div class="col-md-6 mb-4">
+                <div class="dashboard-card h-100">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-team me-3">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <div>
+                            <h2 class="mb-0">{{ equipos_count }}</h2>
+                            <p class="text-muted mb-0">Equipos</p>
+                        </div>
+                    </div>
+                    <p class="mt-3 text-muted">Equipos en los que participas como integrante o jefe.</p>
+                </div>
+            </div>
+            
+            <div class="col-md-6 mb-4">
+                <div class="dashboard-card h-100">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-task me-3">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                        <div>
+                            <h2 class="mb-0">{{ tareas_realizadas }}</h2>
+                            <p class="text-muted mb-0">Tareas Completadas</p>
+                        </div>
+                    </div>
+                    <p class="mt-3 text-muted">Tareas marcadas como realizadas en todos tus proyectos.</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Actividad reciente -->
+        <div class="dashboard-card">
+            <h5><i class="bi bi-activity me-2"></i>Actividad Reciente</h5>
+            <div class="mt-3">
+                <div class="list-group">
+                    <div class="list-group-item border-0">
+                        <div class="d-flex w-100 justify-content-between">
+                            <small class="text-muted">Hoy</small>
+                        </div>
+                        <p class="mb-1">Has iniciado sesión en TaskFlow</p>
+                    </div>
+                    <div class="list-group-item border-0">
+                        <div class="d-flex w-100 justify-content-between">
+                            <small class="text-muted">Esta semana</small>
+                        </div>
+                        <p class="mb-1">Completaste {{ tareas_realizadas }} tareas en total</p>
+                    </div>
+                    <div class="list-group-item border-0">
+                        <div class="d-flex w-100 justify-content-between">
+                            <small class="text-muted">General</small>
+                        </div>
+                        <p class="mb-1">Participas en {{ equipos_count }} equipos de trabajo</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

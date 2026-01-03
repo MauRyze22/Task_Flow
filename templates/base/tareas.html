@@ -1,0 +1,302 @@
+{% extends 'main.html' %}
+
+{% block title %}Mis Tareas{% endblock %}
+{% block page_title %}Mis Tareas{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h5 class="mb-0">Gestión de Tareas</h5>
+        <small class="text-muted">Organiza y prioriza tus actividades</small>
+    </div>
+    <a href="{% url 'create_tarea' %}" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i> Nueva Tarea
+    </a>
+</div>
+
+<!-- Filtros -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="dashboard-card">
+            <div class="row">
+                <div class="col-md-3 mb-2">
+                    <a href="#pendientes" class="btn btn-outline-warning w-100">
+                        <i class="bi bi-clock me-1"></i> Pendientes
+                        <span class="badge bg-warning ms-1">{{ tareas_pendientes.count }}</span>
+                    </a>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <a href="#en-progreso" class="btn btn-outline-primary w-100">
+                        <i class="bi bi-arrow-right-circle me-1"></i> En Progreso
+                        <span class="badge bg-primary ms-1">{{ tareas_en_progreso.count }}</span>
+                    </a>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <a href="#completadas" class="btn btn-outline-success w-100">
+                        <i class="bi bi-check-circle me-1"></i> Completadas
+                        <span class="badge bg-success ms-1">{{ tareas_completadas.count }}</span>
+                    </a>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <a href="#pausadas" class="btn btn-outline-secondary w-100">
+                        <i class="bi bi-pause-circle me-1"></i> Pausadas
+                        <span class="badge bg-secondary ms-1">{{ tareas_pausadas.count }}</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tareas Pendientes -->
+{% if tareas_pendientes %}
+<div class="dashboard-card mb-4" id="pendientes">
+    <div class="d-flex align-items-center mb-3">
+        <div class="bg-warning bg-opacity-10 text-warning rounded p-2 me-3">
+            <i class="bi bi-clock-fill"></i>
+        </div>
+        <div>
+            <h5 class="mb-0">Tareas Pendientes</h5>
+            <small class="text-muted">{{ tareas_pendientes.count }} tareas por realizar</small>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Tarea</th>
+                    <th>Proyecto</th>
+                    <th>Asignado a</th>
+                    <th>Fecha Límite</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tarea in tareas_pendientes %}
+                <tr>
+                    <td>
+                        <a href="{% url 'tarea_detail' tarea.id %}" class="text-decoration-none fw-bold">
+                            {{ tarea.contenido|truncatechars:40 }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="{% url 'proyecto_detail' tarea.proyecto.id %}" class="text-decoration-none">
+                            {{ tarea.proyecto.nombre|truncatechars:20 }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="{% url 'profile_user' tarea.asignado_a.id %}" class="text-decoration-none">
+                            {{ tarea.asignado_a.username }}
+                        </a>
+                    </td>
+                    <td>
+                        {% if tarea.fecha_limite %}
+                        <span class="{% if tarea.dias_para_vencer <= 3 %}text-danger fw-bold{% endif %}">
+                            {{ tarea.fecha_limite|date:"d M Y" }}
+                        </span>
+                        {% else %}
+                        <span class="text-muted">Sin fecha</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'tarea_detail' tarea.id %}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        {% if request.user == tarea.asignado_a or request.user == tarea.proyecto.tutor %}
+                        <a href="{% url 'tarea_update' tarea.id %}" class="btn btn-sm btn-outline-success">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- Tareas En Progreso -->
+{% if tareas_en_progreso %}
+<div class="dashboard-card mb-4" id="en-progreso">
+    <div class="d-flex align-items-center mb-3">
+        <div class="bg-primary bg-opacity-10 text-primary rounded p-2 me-3">
+            <i class="bi bi-arrow-right-circle-fill"></i>
+        </div>
+        <div>
+            <h5 class="mb-0">Tareas En Progreso</h5>
+            <small class="text-muted">{{ tareas_en_progreso.count }} tareas en ejecución</small>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Tarea</th>
+                    <th>Proyecto</th>
+                    <th>Progreso</th>
+                    <th>Última Actualización</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tarea in tareas_en_progreso %}
+                <tr>
+                    <td>
+                        <a href="{% url 'tarea_detail' tarea.id %}" class="text-decoration-none fw-bold">
+                            {{ tarea.contenido|truncatechars:40 }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="{% url 'proyecto_detail' tarea.proyecto.id %}" class="text-decoration-none">
+                            {{ tarea.proyecto.nombre|truncatechars:20 }}
+                        </a>
+                    </td>
+                    <td>
+                        <div class="progress" style="height: 8px;">
+                            <div class="progress-bar bg-primary" style="width: {{ tarea.progreso|default:0 }}%"></div>
+                        </div>
+                        <small>{{ tarea.progreso|default:0 }}%</small>
+                    </td>
+                    <td>{{ tarea.updated|timesince }}</td>
+                    <td>
+                        <a href="{% url 'tarea_detail' tarea.id %}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- Tareas Completadas -->
+{% if tareas_completadas %}
+<div class="dashboard-card mb-4" id="completadas">
+    <div class="d-flex align-items-center mb-3">
+        <div class="bg-success bg-opacity-10 text-success rounded p-2 me-3">
+            <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <div>
+            <h5 class="mb-0">Tareas Completadas</h5>
+            <small class="text-muted">{{ tareas_completadas.count }} tareas finalizadas</small>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Tarea</th>
+                    <th>Proyecto</th>
+                    <th>Completada por</th>
+                    <th>Fecha Completada</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tarea in tareas_completadas %}
+                <tr>
+                    <td>
+                        <a href="{% url 'tarea_detail' tarea.id %}" class="text-decoration-none fw-bold">
+                            {{ tarea.contenido|truncatechars:40 }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="{% url 'proyecto_detail' tarea.proyecto.id %}" class="text-decoration-none">
+                            {{ tarea.proyecto.nombre|truncatechars:20 }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="{% url 'profile_user' tarea.asignado_a.id %}" class="text-decoration-none">
+                            {{ tarea.asignado_a.username }}
+                        </a>
+                    </td>
+                    <td>{{ tarea.fecha_completada|default:"-"|date:"d M Y" }}</td>
+                    <td>
+                        <a href="{% url 'tarea_detail' tarea.id %}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- Tareas Pausadas -->
+{% if tareas_pausadas %}
+<div class="dashboard-card" id="pausadas">
+    <div class="d-flex align-items-center mb-3">
+        <div class="bg-secondary bg-opacity-10 text-secondary rounded p-2 me-3">
+            <i class="bi bi-pause-circle-fill"></i>
+        </div>
+        <div>
+            <h5 class="mb-0">Tareas Pausadas</h5>
+            <small class="text-muted">{{ tareas_pausadas.count }} tareas en pausa</small>
+        </div>
+    </div>
+    
+    <div class="table-responsive">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Tarea</th>
+                    <th>Proyecto</th>
+                    <th>Razón</th>
+                    <th>Fecha Pausa</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for tarea in tareas_pausadas %}
+                <tr>
+                    <td>
+                        <a href="{% url 'tarea_detail' tarea.id %}" class="text-decoration-none fw-bold">
+                            {{ tarea.contenido|truncatechars:40 }}
+                        </a>
+                    </td>
+                    <td>
+                        <a href="{% url 'proyecto_detail' tarea.proyecto.id %}" class="text-decoration-none">
+                            {{ tarea.proyecto.nombre|truncatechars:20 }}
+                        </a>
+                    </td>
+                    <td>{{ tarea.razon_pausa|default:"-"|truncatechars:30 }}</td>
+                    <td>{{ tarea.fecha_pausa|default:"-"|date:"d M Y" }}</td>
+                    <td>
+                        <a href="{% url 'tarea_detail' tarea.id %}" class="btn btn-sm btn-outline-primary">
+                            <i class="bi bi-eye"></i>
+                        </a>
+                        {% if request.user == tarea.asignado_a or request.user == tarea.proyecto.tutor %}
+                        <a href="{% url 'tarea_update' tarea.id %}" class="btn btn-sm btn-outline-success">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+{% if not tareas_pendientes and not tareas_en_progreso and not tareas_completadas and not tareas_pausadas %}
+<div class="text-center py-5 my-5">
+    <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 120px; height: 120px;">
+        <i class="bi bi-check2-all display-4 text-muted"></i>
+    </div>
+    <h4 class="text-muted">No tienes tareas asignadas</h4>
+    <p class="text-muted mb-4">Crea tu primera tarea o espera a que te asignen una.</p>
+    <a href="{% url 'create_tarea' %}" class="btn btn-primary btn-lg">
+        <i class="bi bi-plus-circle me-2"></i> Crear Mi Primera Tarea
+    </a>
+</div>
+{% endif %}
+{% endblock %}
