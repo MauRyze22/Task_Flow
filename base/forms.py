@@ -1,5 +1,5 @@
 from django import forms
-from .models import Equipo, Proyecto, Tarea, Comentario, Perfil
+from .models import Equipo, Proyecto, Tarea, Comentario, Perfil, Invitacion
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
@@ -39,3 +39,9 @@ class PerfilForm(forms.ModelForm):
         model = Perfil
         fields = '__all__'
         exclude = ['user']
+        
+
+class InvitacionForm(forms.ModelForm):
+    class Meta:
+        model = Invitacion
+        fields = ['equipo']

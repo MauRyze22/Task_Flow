@@ -1,159 +1,297 @@
-{% extends 'main.html' %}
+{% extends "main.html" %}
+{% load static %}
 
-{% block title %}Proyecto: {{ proyecto.nombre }}{% endblock %}
-{% block page_title %}Detalles del Proyecto{% endblock %}
-{% block page_subtitle %}{{ proyecto.nombre }}{% endblock %}
+{% block title %}{{ proyecto.name }}{% endblock %}
+{% block page_title %}{{ proyecto.name }}{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-lg-8 mb-4">
-        <div class="dashboard-card">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h5 class="mb-0">Información del Proyecto</h5>
-                    <small class="text-muted">Detalles completos del proyecto</small>
+<!-- Breadcrumb -->
+<div class="breadcrumb-nav">
+    <a href="{% url 'proyectos' %}" class="breadcrumb-link">
+        <i class="bi bi-arrow-left"></i>
+        Volver a Proyectos
+    </a>
+</div>
+
+<div class="detail-container">
+    <!-- Columna principal -->
+    <div class="detail-main">
+        <!-- Header del proyecto -->
+        <div class="card detail-header-card project-header-card">
+            <div class="detail-header">
+                <div class="header-icon">
+                    <i class="bi bi-folder-fill"></i>
                 </div>
-                <div class="bg-success rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                    <i class="bi bi-folder-fill text-white fs-4"></i>
+                <div class="header-content">
+                    <h1>{{ proyecto.name }}</h1>
+                    <p>{{ proyecto.get_tipo_display }}</p>
                 </div>
-            </div>
-            
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <div class="p-3 border rounded bg-light">
-                        <small class="text-muted">Nombre del Proyecto</small>
-                        <p class="mb-0 fw-bold fs-5">{{ proyecto.nombre }}</p>
-                    </div>
-                </div>
-                
-                <div class="col-md-6 mb-3">
-                    <div class="p-3 border rounded bg-light">
-                        <small class="text-muted">Estado</small>
-                        <p class="mb-0">
-                            <span class="badge {% if proyecto.estado == 'activo' %}bg-success{% elif proyecto.estado == 'completado' %}bg-primary{% else %}bg-warning{% endif %}">
-                                {{ proyecto.estado|default:"activo"|title }}
-                            </span>
-                        </p>
-                    </div>
-                </div>
-                
-                <div class="col-md-6 mb-3">
-                    <div class="p-3 border rounded bg-light">
-                        <small class="text-muted">Tutor del Proyecto</small>
-                        <p class="mb-0 fw-bold">
-                            <a href="{% url 'profile_user' proyecto.tutor.id %}" class="text-decoration-none">
-                                <i class="bi bi-person-circle me-1"></i> {{ proyecto.tutor.username }}
-                            </a>
-                        </p>
-                    </div>
-                </div>
-                
-                <div class="col-md-6 mb-3">
-                    <div class="p-3 border rounded bg-light">
-                        <small class="text-muted">Equipo Asignado</small>
-                        <p class="mb-0 fw-bold">
-                            <a href="{% url 'equipo_detail' proyecto.equipo.id %}" class="text-decoration-none">
-                                <i class="bi bi-people me-1"></i> Equipo #{{ proyecto.equipo.numero }}
-                            </a>
-                        </p>
-                    </div>
-                </div>
-                
-                <div class="col-12 mb-3">
-                    <div class="p-3 border rounded bg-light">
-                        <small class="text-muted">Objetivo</small>
-                        <p class="mb-0">{{ proyecto.objetivo|default:"Sin objetivo definido" }}</p>
-                    </div>
-                </div>
-                
-                {% if proyecto.descripcion %}
-                <div class="col-12 mb-3">
-                    <div class="p-3 border rounded bg-light">
-                        <small class="text-muted">Descripción</small>
-                        <p class="mb-0">{{ proyecto.descripcion }}</p>
-                    </div>
-                </div>
-                {% endif %}
-                
-                <div class="col-md-6 mb-3">
-                    <div class="p-3 border rounded bg-light">
-                        <small class="text-muted">Fecha de Creación</small>
-                        <p class="mb-0">{{ proyecto.created|date:"d M Y" }}</p>
-                    </div>
-                </div>
-                
-                <div class="col-md-6 mb-3">
-                    <div class="p-3 border rounded bg-light">
-                        <small class="text-muted">Última Actualización</small>
-                        <p class="mb-0">{{ proyecto.updated|timesince }}</p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="mt-4 pt-3 border-top">
-                <h6>Acciones</h6>
-                <div class="d-flex gap-2 mt-2">
-                    <a href="{% url 'proyectos' %}" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left me-1"></i> Volver a Proyectos
-                    </a>
+                <div class="header-badge">
                     {% if request.user == proyecto.tutor %}
-                    <a href="{% url 'proyecto_update' proyecto.id %}" class="btn btn-success">
-                        <i class="bi bi-pencil-square me-1"></i> Editar Proyecto
-                    </a>
-                    <a href="{% url 'proyecto_delete' proyecto.id %}" class="btn btn-danger">
-                        <i class="bi bi-trash me-1"></i> Eliminar Proyecto
-                    </a>
+                        <span class="badge-large badge-success">
+                            <i class="bi bi-star-fill"></i>
+                            Eres el Tutor
+                        </span>
+                    {% else %}
+                        <span class="badge-large badge-primary">
+                            <i class="bi bi-person-check"></i>
+                            Participante
+                        </span>
                     {% endif %}
                 </div>
             </div>
         </div>
+        
+        <!-- Información del proyecto -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="bi bi-info-circle"></i>
+                    <h3>Información del Proyecto</h3>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="info-grid-detail">
+                    <div class="info-box">
+                        <div class="info-box-icon bg-success">
+                            <i class="bi bi-tag"></i>
+                        </div>
+                        <div class="info-box-content">
+                            <span class="info-box-label">Nombre</span>
+                            <span class="info-box-value">{{ proyecto.name }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <div class="info-box-icon bg-primary">
+                            <i class="bi bi-person-badge"></i>
+                        </div>
+                        <div class="info-box-content">
+                            <span class="info-box-label">Tutor</span>
+                            <a href="{% url 'profile_user' proyecto.tutor.id %}" class="info-box-value info-box-link">
+                                {{ proyecto.tutor.username }}
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <div class="info-box-icon bg-info">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <div class="info-box-content">
+                            <span class="info-box-label">Equipo</span>
+                            <a href="{% url 'equipo_detail' proyecto.equipo.id %}" class="info-box-value info-box-link">
+                                Equipo {{ proyecto.equipo.numero }}
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <div class="info-box-icon bg-warning">
+                            <i class="bi bi-bookmark"></i>
+                        </div>
+                        <div class="info-box-content">
+                            <span class="info-box-label">Tipo</span>
+                            <span class="info-box-value">{{ proyecto.get_tipo_display }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Fechas -->
+                <div class="info-grid-detail">
+                    <div class="info-box">
+                        <div class="info-box-icon bg-primary">
+                            <i class="bi bi-calendar-plus"></i>
+                        </div>
+                        <div class="info-box-content">
+                            <span class="info-box-label">Fecha de creación</span>
+                            <span class="info-box-value">{{ proyecto.created|date:"d M Y" }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <div class="info-box-icon bg-info">
+                            <i class="bi bi-clock-history"></i>
+                        </div>
+                        <div class="info-box-content">
+                            <span class="info-box-label">Última actualización</span>
+                            <span class="info-box-value">{{ proyecto.updated|timesince }} atrás</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Acciones (solo para tutor) -->
+        {% if proyecto.tutor == request.user %}
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="bi bi-lightning-charge"></i>
+                    <h3>Acciones del Tutor</h3>
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="action-description">Como tutor del proyecto, puedes gestionar su información y tareas.</p>
+                <div class="action-buttons-grid">
+                    <a href="{% url 'proyecto_update' proyecto.id %}" class="btn btn-success btn-full">
+                        <i class="bi bi-pencil-square"></i>
+                        <span>Editar Proyecto</span>
+                    </a>
+                    <button class="btn btn-danger btn-full" onclick="confirmDelete()">
+                        <i class="bi bi-trash"></i>
+                        <span>Eliminar Proyecto</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
     
-    <div class="col-lg-4 mb-4">
-        <div class="dashboard-card">
-            <div class="d-flex align-items-center mb-3">
-                <div class="bg-warning bg-opacity-10 text-warning rounded p-2 me-3">
-                    <i class="bi bi-check-circle-fill"></i>
-                </div>
-                <div>
-                    <h5 class="mb-0">Resumen del Proyecto</h5>
-                    <small class="text-muted">Estadísticas y detalles</small>
-                </div>
-            </div>
-            
-            <div class="list-group list-group-flush">
-                <div class="list-group-item border-0 px-0 py-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span>Tareas Totales:</span>
-                        <span class="badge bg-primary">{{ proyecto.tareas.count }}</span>
-                    </div>
-                </div>
-                <div class="list-group-item border-0 px-0 py-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span>Tareas Completadas:</span>
-                        <span class="badge bg-success">{{ proyecto.tareas.filter|default:0 }}</span>
-                    </div>
-                </div>
-                <div class="list-group-item border-0 px-0 py-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span>Tareas Pendientes:</span>
-                        <span class="badge bg-warning">{{ proyecto.tareas.filter|default:0 }}</span>
-                    </div>
-                </div>
-                <div class="list-group-item border-0 px-0 py-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <span>Miembros del Equipo:</span>
-                        <span class="badge bg-info">{{ proyecto.equipo.integrantes.count }}</span>
-                    </div>
+    <!-- Sidebar - Estadísticas y Acciones -->
+    <div class="detail-sidebar">
+        <!-- Estadísticas del proyecto -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="bi bi-bar-chart"></i>
+                    <h3>Estadísticas</h3>
                 </div>
             </div>
-            
-            <div class="mt-4">
-                <a href="{% url 'create_tarea' %}" class="btn btn-primary w-100">
-                    <i class="bi bi-plus-circle me-1"></i> Crear Nueva Tarea
-                </a>
+            <div class="card-body">
+                <div class="stats-list">
+                    <div class="stat-item">
+                        <div class="stat-item-icon bg-primary">
+                            <i class="bi bi-list-check"></i>
+                        </div>
+                        <div class="stat-item-content">
+                            <span class="stat-item-label">Tareas Totales</span>
+                            <span class="stat-item-value">{{ proyecto.tareas.count }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <div class="stat-item-icon bg-success">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                        <div class="stat-item-content">
+                            <span class="stat-item-label">Completadas</span>
+                            <span class="stat-item-value">
+                                {{ proyecto.tareas.filter|length|default:0 }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <div class="stat-item-icon bg-warning">
+                            <i class="bi bi-clock"></i>
+                        </div>
+                        <div class="stat-item-content">
+                            <span class="stat-item-label">Pendientes</span>
+                            <span class="stat-item-value">
+                                {{ proyecto.tareas.filter|length|default:0 }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <div class="stat-item-icon bg-info">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <div class="stat-item-content">
+                            <span class="stat-item-label">Miembros del Equipo</span>
+                            <span class="stat-item-value">{{ proyecto.equipo.integrantes.count }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Acciones rápidas -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="bi bi-lightning"></i>
+                    <h3>Acciones Rápidas</h3>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="quick-actions">
+                    <a href="{% url 'create_tarea' %}" class="quick-action-btn">
+                        <i class="bi bi-plus-circle"></i>
+                        <span>Crear Nueva Tarea</span>
+                    </a>
+                    <a href="{% url 'tareas' %}" class="quick-action-btn">
+                        <i class="bi bi-list-check"></i>
+                        <span>Ver Todas las Tareas</span>
+                    </a>
+                    <a href="{% url 'equipo_detail' proyecto.equipo.id %}" class="quick-action-btn">
+                        <i class="bi bi-people"></i>
+                        <span>Ver Equipo</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Info del equipo -->
+        <div class="card stats-mini-card">
+            <h4>Equipo Asignado</h4>
+            <div class="team-mini-info">
+                <div class="team-mini-header">
+                    <div class="team-mini-icon">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div>
+                        <a href="{% url 'equipo_detail' proyecto.equipo.id %}" class="team-mini-name">
+                            Equipo {{ proyecto.equipo.numero }}
+                        </a>
+                        <span class="team-mini-members">{{ proyecto.equipo.integrantes.count }} integrantes</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Modal de confirmación -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal-content">
+        <div class="modal-header-danger">
+            <i class="bi bi-exclamation-triangle"></i>
+            <h3>¿Eliminar proyecto?</h3>
+        </div>
+        <div class="modal-body">
+            <p>Esta acción no se puede deshacer. Se eliminarán todas las tareas y datos relacionados con este proyecto.</p>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeDeleteModal()">
+                Cancelar
+            </button>
+            <a href="{% url 'proyecto_delete' proyecto.id %}" class="btn btn-danger">
+                Sí, eliminar
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function confirmDelete() {
+    document.getElementById('deleteModal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.remove('show');
+    document.body.style.overflow = '';
+}
+
+// Cerrar modal al hacer clic fuera
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeDeleteModal();
+    }
+});
+</script>
 {% endblock %}

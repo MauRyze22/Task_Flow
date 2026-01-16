@@ -11,6 +11,7 @@ urlpatterns = [
     path('register-user/', views.register_user, name = 'register_user'),
     path('profile-user/<int:pk>/', views.profile_user, name = 'profile_user'),
     path('actualizar_profile/<int:pk>/', views.actualizar_profile, name = 'actualizar_profile'),
+    path('mostrar_profiles/', views.mostrar_profiles, name = 'mostrar_profiles'),
     
     # url para proyectos
     path('proyectos/', views.proyectos, name = 'proyectos'),
@@ -40,4 +41,10 @@ urlpatterns = [
     path('equipo-update/<int:pk>/', views.equipo_update, name = 'equipo_update'),
     path('equipo-delete/<int:pk>', views.equipo_delete, name = 'equipo_delete'),
     
+    # url para invitaciones:
+    path('enviar_invitacion/<int:pk>/', views.enviar_invitacion, name = 'enviar_invitacion'),
+    path('aceptar_invitacion/<uuid:token>/', views.aceptar_invitacion, name = 'aceptar_invitacion'),
+    
 ]
+
+

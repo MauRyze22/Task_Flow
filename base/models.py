@@ -2,10 +2,11 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from datetime import date, datetime
+import uuid
 
 
 class Equipo(models.Model):
-    numero = models.CharField(max_length = 10, unique = True)
+    numero = models.CharField(max_length = 10, unique = False)
     jefe = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     integrantes = models.ManyToManyField(User, related_name='equipos')   
     created = models.DateTimeField(auto_now_add=True)
@@ -117,6 +118,7 @@ class Perfil(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null = True, blank = True)
     numero = models.CharField(max_length=50, blank = True, null =True, default='No registrado')
     email = models.EmailField()
+    imagen = models.ImageField(upload_to = 'perfiles/',null = True, blank = True)
     pais = models.CharField(max_length = 20, null = True, blank = True, default='No registrado')
     rol = models.CharField(max_length = 50, default = 'usuario', null = True, blank = True)
     updated = models.DateTimeField(auto_now=True)
@@ -127,8 +129,18 @@ class Perfil(models.Model):
     
 
     
+class Invitacion(models.Model):
+    equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE)
+    invitado = models.ForeignKey(User, on_delete=models.CASCADE, related_name = 'invitacion')
+    aceptada = models.BooleanField(default=False)
+    token = models.UUIDField(default = uuid.uuid4, editable = False, unique = True)
+    created = models.DateTimeField(auto_now_add=True)
     
+    class Meta:
+        verbose_name = 'Invitacion'
+        verbose_name_plural = 'Invitaciones'
     
+    def __str__(self):
+        return f'Invitacion del equipo {self.equipo.numero} para {self.invitado.username}'
   
-    
     

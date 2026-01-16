@@ -1,100 +1,297 @@
 {% extends "main.html" %}
+{% load static %}
 
 {% block title %}{% if page == 'crear' %}Crear Tarea{% else %}Editar Tarea{% endif %}{% endblock %}
 {% block page_title %}{% if page == 'crear' %}Nueva Tarea{% else %}Editar Tarea{% endif %}{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-8">
-        <div class="dashboard-card">
-            <div class="d-flex align-items-center mb-4">
-                <div class="icon-task me-3">
-                    <i class="bi bi-check-circle-fill"></i>
-                </div>
-                <div>
-                    <h5 class="mb-0">{% if page == 'crear' %}Crear Nueva Tarea{% else %}Modificar Tarea{% endif %}</h5>
-                    <p class="text-muted mb-0">{% if page == 'crear' %}Asigna una nueva tarea{% else %}Actualiza la información de la tarea{% endif %}</p>
-                </div>
+<div class="form-page-container">
+    <div class="form-card">
+        <!-- Header del formulario -->
+        <div class="form-header">
+            <div class="form-icon task-icon-gradient">
+                <i class="bi bi-check-circle-fill"></i>
             </div>
-            
-            {% if messages %}
-            {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show mb-4" role="alert">
-                <i class="bi bi-exclamation-circle me-2"></i>
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <div class="form-header-text">
+                <h2>{% if page == 'crear' %}Crear Nueva Tarea{% else %}Modificar Tarea{% endif %}</h2>
+                <p>{% if page == 'crear' %}Asigna una nueva tarea a tu equipo{% else %}Actualiza la información de la tarea{% endif %}</p>
             </div>
-            {% endfor %}
-            {% endif %}
+        </div>
+        
+        <!-- Formulario -->
+        <form method="POST" class="profile-form" id="tareaForm">
+            {% csrf_token %}
             
-            <form method="POST">
-                {% csrf_token %}
-                
-                <div class="row">
-                    {% for field in form %}
-                    <div class="{% if field.name == 'contenido' or field.name == 'descripcion' %}col-12{% else %}col-md-6{% endif %} mb-3">
-                        <label for="{{ field.id_for_label }}" class="form-label fw-bold">
-                            {{ field.label }}
-                            {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
-                        </label>
-                        {{ field }}
-                        {% if field.help_text %}
-                        <div class="form-text">{{ field.help_text }}</div>
+            <div class="form-grid">
+                {% for field in form %}
+                <div class="form-field {% if 'contenido' in field.name or 'descripcion' in field.name %}form-field-full{% endif %} {% if field.field.required %}required{% endif %}">
+                    <label for="{{ field.id_for_label }}" class="field-label">
+                        {{ field.label }}
+                        {% if field.field.required %}<span class="required-mark">*</span>{% endif %}
+                    </label>
+                    
+                    <div class="field-wrapper {% if field.errors %}has-error{% endif %}">
+                        {% if 'contenido' in field.name %}
+                            <i class="field-icon bi bi-card-text"></i>
+                        {% elif 'proyecto' in field.name %}
+                            <i class="field-icon bi bi-folder"></i>
+                        {% elif 'estado' in field.name %}
+                            <i class="field-icon bi bi-flag"></i>
+                        {% elif 'asignado' in field.name %}
+                            <i class="field-icon bi bi-person"></i>
+                        {% elif 'fecha' in field.name %}
+                            <i class="field-icon bi bi-calendar"></i>
+                        {% elif 'descripcion' in field.name %}
+                            <i class="field-icon bi bi-text-left"></i>
+                        {% elif 'prioridad' in field.name %}
+                            <i class="field-icon bi bi-exclamation-triangle"></i>
+                        {% else %}
+                            <i class="field-icon bi bi-pencil"></i>
                         {% endif %}
+                        
+                        {{ field }}
+                        
                         {% if field.errors %}
-                        <div class="text-danger small mt-1">
-                            {{ field.errors }}
-                        </div>
+                        <i class="field-status bi bi-exclamation-circle"></i>
                         {% endif %}
                     </div>
-                    {% endfor %}
+                    
+                    {% if field.help_text %}
+                    <small class="field-help">{{ field.help_text }}</small>
+                    {% endif %}
+                    
+                    {% if field.errors %}
+                    <div class="field-error">
+                        <i class="bi bi-x-circle"></i>
+                        {% for error in field.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                 </div>
-                
-                <div class="alert alert-info mt-3">
-                    <i class="bi bi-info-circle me-2"></i>
-                    <strong>Nota:</strong> Solo puedes crear tareas en proyectos donde participes o seas tutor.
+                {% endfor %}
+            </div>
+            
+            <!-- Información importante -->
+            <div class="form-info-banner task-info-banner">
+                <i class="bi bi-lightbulb"></i>
+                <div>
+                    <strong>Información importante:</strong>
+                    <p>Solo puedes crear tareas en proyectos donde participes como integrante o seas el tutor del proyecto.</p>
                 </div>
-                
-                <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
-                    <a href="{% if page != 'crear' %}{% url 'tarea_detail' tarea.id %}{% else %}{{ request.META.HTTP_REFERER }}{% endif %}" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left me-1"></i> Cancelar
-                    </a>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-{% if page == 'crear' %}plus-circle{% else %}check-circle{% endif %} me-1"></i>
-                        {% if page == 'crear' %}Crear Tarea{% else %}Actualizar{% endif %}
-                    </button>
-                </div>
-            </form>
-        </div>
+            </div>
+            
+            <!-- Botones de acción -->
+            <div class="form-actions">
+                <a href="{% if page != 'crear' and tarea %}{% url 'tarea_detail' tarea.id %}{% else %}{% url 'tareas' %}{% endif %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Cancelar</span>
+                </a>
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <i class="bi bi-{% if page == 'crear' %}plus-circle{% else %}check-circle{% endif %}"></i>
+                    <span>{% if page == 'crear' %}Crear Tarea{% else %}Actualizar Tarea{% endif %}</span>
+                </button>
+            </div>
+        </form>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Validación y efectos visuales
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('tareaForm');
+    const inputs = form.querySelectorAll('input, select, textarea');
+    
+    // Animación al hacer focus
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.closest('.field-wrapper').classList.add('focused');
+        });
+        
+        input.addEventListener('blur', function() {
+            this.closest('.field-wrapper').classList.remove('focused');
+            
+            // Validar campo
+            if (this.value.trim() !== '' || this.selectedOptions?.length > 0) {
+                this.closest('.field-wrapper').classList.add('has-value');
+            } else {
+                this.closest('.field-wrapper').classList.remove('has-value');
+            }
+        });
+        
+        // Marcar campos con valor inicial
+        if (input.value.trim() !== '' || input.selectedOptions?.length > 0) {
+            input.closest('.field-wrapper').classList.add('has-value');
+        }
+    });
+    
+    // Validación de fecha límite
+    const fechaLimiteInput = form.querySelector('input[name*="fecha_limite"]');
+    if (fechaLimiteInput) {
+        fechaLimiteInput.addEventListener('change', function() {
+            const selectedDate = new Date(this.value);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const wrapper = this.closest('.field-wrapper');
+            
+            if (selectedDate < today) {
+                // Crear advertencia si no existe
+                let warning = wrapper.querySelector('.date-warning');
+                if (!warning) {
+                    warning = document.createElement('div');
+                    warning.className = 'date-warning';
+                    warning.innerHTML = '<i class="bi bi-exclamation-triangle"></i> La fecha es anterior a hoy';
+                    wrapper.parentNode.insertBefore(warning, wrapper.nextSibling);
+                }
+            } else {
+                // Remover advertencia si existe
+                const warning = wrapper.querySelector('.date-warning');
+                if (warning) warning.remove();
+            }
+        });
+    }
+    
+    // Contador de caracteres para textareas
+    const textareas = form.querySelectorAll('textarea');
+    textareas.forEach(textarea => {
+        const maxLength = textarea.getAttribute('maxlength');
+        if (maxLength) {
+            const wrapper = textarea.closest('.field-wrapper');
+            const counter = document.createElement('div');
+            counter.className = 'char-counter';
+            counter.textContent = `0 / ${maxLength}`;
+            wrapper.appendChild(counter);
+            
+            textarea.addEventListener('input', function() {
+                const count = this.value.length;
+                counter.textContent = `${count} / ${maxLength}`;
+                counter.style.color = count > maxLength * 0.9 ? 'var(--danger)' : 'var(--gray-500)';
+            });
+            
+            // Inicializar contador
+            if (textarea.value) {
+                textarea.dispatchEvent(new Event('input'));
+            }
+        }
+    });
+    
+    // Preview de estado seleccionado
+    const estadoSelect = form.querySelector('select[name*="estado"]');
+    if (estadoSelect) {
+        const wrapper = estadoSelect.closest('.field-wrapper');
+        
+        function updateEstadoPreview() {
+            const value = estadoSelect.value.toLowerCase();
+            
+            // Remover clases previas
+            wrapper.classList.remove('estado-pendiente', 'estado-en_progreso', 'estado-completada', 'estado-pausada');
+            
+            // Añadir clase actual
+            if (value) {
+                wrapper.classList.add(`estado-${value}`);
+            }
+        }
+        
+        estadoSelect.addEventListener('change', updateEstadoPreview);
+        updateEstadoPreview(); // Inicializar
+    }
+    
+    // Animación al enviar
+    form.addEventListener('submit', function(e) {
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = submitBtn.querySelector('span');
+        const btnIcon = submitBtn.querySelector('i');
+        
+        submitBtn.disabled = true;
+        btnIcon.className = 'bi bi-arrow-clockwise rotating';
+        btnText.textContent = 'Guardando...';
+    });
+});
+</script>
 
 <style>
-    /* Estilos específicos para formularios */
-    input, select, textarea {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        transition: all 0.3s;
-        font-size: 14px;
+/* Estilos adicionales para este formulario */
+.task-icon-gradient {
+    background: linear-gradient(135deg, #F59E0B, #FBBF24) !important;
+}
+
+.form-field-full {
+    grid-column: 1 / -1;
+}
+
+textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.char-counter {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gray-500);
+    pointer-events: none;
+    background: var(--white);
+    padding: 2px 6px;
+    border-radius: 4px;
+    z-index: 2;
+}
+
+.date-warning {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: #FEF3C7;
+    color: #92400E;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.date-warning i {
+    font-size: 14px;
+}
+
+/* Preview de estado en el select */
+.field-wrapper.estado-pendiente select {
+    border-color: #FDE68A;
+    background: #FFFBEB;
+}
+
+.field-wrapper.estado-en_progreso select {
+    border-color: #BFDBFE;
+    background: #EFF6FF;
+}
+
+.field-wrapper.estado-completada select {
+    border-color: #A7F3D0;
+    background: #ECFDF5;
+}
+
+.field-wrapper.estado-pausada select {
+    border-color: #D1D5DB;
+    background: #F9FAFB;
+}
+
+.task-info-banner {
+    background: #EFF6FF !important;
+    border-left-color: #3B82F6 !important;
+}
+
+.task-info-banner i {
+    color: #3B82F6 !important;
+}
+
+@media (max-width: 768px) {
+    .form-field-full {
+        grid-column: 1;
     }
-    
-    input:focus, select:focus, textarea:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
-        outline: none;
-    }
-    
-    textarea {
-        min-height: 120px;
-        resize: vertical;
-    }
-    
-    .form-label {
-        font-weight: 500;
-        margin-bottom: 8px;
-        color: #495057;
-    }
+}
 </style>
-{% endblock %}
+{% endblock %}  

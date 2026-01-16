@@ -1,81 +1,120 @@
 {% extends "main.html" %}
+{% load static %}
 
 {% block title %}Confirmar Eliminación{% endblock %}
 {% block page_title %}Confirmar Eliminación{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-6">
-        <div class="dashboard-card text-center">
-            <div class="mb-4">
-                <div class="bg-danger bg-opacity-10 text-danger rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 100px; height: 100px;">
-                    <i class="bi bi-exclamation-triangle display-4"></i>
+<div class="delete-page-container">
+    <div class="delete-card">
+        <!-- Ícono de advertencia -->
+        <div class="delete-icon">
+            <i class="bi bi-exclamation-triangle"></i>
+        </div>
+        
+        <!-- Título -->
+        <h2 class="delete-title">¿Estás seguro?</h2>
+        <p class="delete-subtitle">Esta acción no se puede deshacer</p>
+        
+        <!-- Información del item a eliminar -->
+        <div class="delete-item-info">
+            {% if equipo %}
+                <div class="item-icon bg-primary">
+                    <i class="bi bi-people"></i>
                 </div>
-                
-                <h4>¿Estás seguro?</h4>
-                
-                <div class="mt-4 p-4 border rounded bg-light">
-                    {% if equipo %}
-                    <p class="mb-0 fw-bold">Equipo #{{ equipo.numero }}</p>
-                    <p class="text-muted mb-0">{{ equipo.nombre|default:"Sin nombre" }}</p>
-                    {% endif %}
-                    
-                    {% if proyecto %}
-                    <p class="mb-0 fw-bold">{{ proyecto.nombre }}</p>
-                    <p class="text-muted mb-0">{{ proyecto.objetivo|truncatechars:50 }}</p>
-                    {% endif %}
-                    
-                    {% if tarea %}
-                    <p class="mb-0 fw-bold">{{ tarea.contenido|truncatechars:50 }}</p>
-                    <p class="text-muted mb-0">Proyecto: {{ tarea.proyecto.nombre }}</p>
-                    {% endif %}
-                    
-                    {% if comentario %}
-                    <p class="mb-0 fw-bold">Comentario de {{ comentario.user.username }}</p>
-                    <p class="text-muted mb-0">{{ comentario.cuerpo|truncatechars:100 }}</p>
+                <div class="item-details">
+                    <span class="item-type">Equipo</span>
+                    <span class="item-name">{{ equipo.numero }}</span>
+                    {% if equipo.nombre %}
+                        <span class="item-description">{{ equipo.nombre }}</span>
                     {% endif %}
                 </div>
-                
-                <div class="alert alert-warning mt-4">
-                    <i class="bi bi-exclamation-circle me-2"></i>
-                    <strong>¡Atención!</strong> Esta acción no se puede deshacer.
-                </div>
-            </div>
+            {% endif %}
             
-            <form method="POST">
-                {% csrf_token %}
-                
-                <div class="d-flex justify-content-center gap-3">
-                    <a href="{{ request.META.HTTP_REFERER }}" class="btn btn-outline-secondary btn-lg">
-                        <i class="bi bi-x-circle me-1"></i> Cancelar
-                    </a>
-                    <button type="submit" class="btn btn-danger btn-lg">
-                        <i class="bi bi-trash me-1"></i> Sí, Eliminar
-                    </button>
+            {% if proyecto %}
+                <div class="item-icon bg-success">
+                    <i class="bi bi-folder"></i>
                 </div>
-            </form>
+                <div class="item-details">
+                    <span class="item-type">Proyecto</span>
+                    <span class="item-name">{{ proyecto.name }}</span>
+                    {% if proyecto.equipo %}
+                        <span class="item-description">Equipo {{ proyecto.equipo.numero }}</span>
+                    {% endif %}
+                </div>
+            {% endif %}
             
-            <div class="mt-4 pt-3 border-top">
-                <p class="text-muted small">
-                    <i class="bi bi-info-circle me-1"></i>
-                    Se eliminarán todos los datos relacionados permanentemente.
-                </p>
+            {% if tarea %}
+                <div class="item-icon bg-warning">
+                    <i class="bi bi-check-circle"></i>
+                </div>
+                <div class="item-details">
+                    <span class="item-type">Tarea</span>
+                    <span class="item-name">{{ tarea.contenido|truncatechars:50 }}</span>
+                    <span class="item-description">Proyecto: {{ tarea.proyecto.name }}</span>
+                </div>
+            {% endif %}
+            
+            {% if comentario %}
+                <div class="item-icon bg-info">
+                    <i class="bi bi-chat-text"></i>
+                </div>
+                <div class="item-details">
+                    <span class="item-type">Comentario</span>
+                    <span class="item-name">Por {{ comentario.user.username }}</span>
+                    <span class="item-description">{{ comentario.cuerpo|truncatechars:100 }}</span>
+                </div>
+            {% endif %}
+        </div>
+        
+        <!-- Banner de advertencia -->
+        <div class="delete-warning">
+            <i class="bi bi-exclamation-circle"></i>
+            <div>
+                <strong>¡Atención!</strong>
+                <p>Se eliminarán todos los datos relacionados permanentemente. Esta acción es irreversible.</p>
             </div>
+        </div>
+        
+        <!-- Formulario -->
+        <form method="POST" class="delete-form" id="deleteForm">
+            {% csrf_token %}
+            
+            <div class="delete-actions">
+                <a href="javascript:history.back()" class="btn btn-secondary btn-large">
+                    <i class="bi bi-x-circle"></i>
+                    <span>Cancelar</span>
+                </a>
+                <button type="submit" class="btn btn-danger btn-large" id="deleteBtn">
+                    <i class="bi bi-trash"></i>
+                    <span>Sí, Eliminar</span>
+                </button>
+            </div>
+        </form>
+        
+        <!-- Info adicional -->
+        <div class="delete-footer">
+            <i class="bi bi-info-circle"></i>
+            <span>Puedes cancelar esta acción presionando "Cancelar"</span>
         </div>
     </div>
 </div>
+{% endblock %}
 
-<style>
-    /* Estilos para la página de confirmación */
-    .btn-lg {
-        padding: 12px 30px;
-        font-size: 16px;
-        min-width: 150px;
-    }
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('deleteForm');
+    const deleteBtn = document.getElementById('deleteBtn');
     
-    .alert-warning {
-        background-color: #fff3cd;
-        border-color: #ffeaa7;
-    }
-</style>
+    form.addEventListener('submit', function(e) {
+        const btnText = deleteBtn.querySelector('span');
+        const btnIcon = deleteBtn.querySelector('i');
+        
+        deleteBtn.disabled = true;
+        btnIcon.className = 'bi bi-arrow-clockwise rotating';
+        btnText.textContent = 'Eliminando...';
+    });
+});
+</script>
 {% endblock %}

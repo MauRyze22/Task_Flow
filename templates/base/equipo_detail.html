@@ -1,125 +1,238 @@
 {% extends "main.html" %}
+{% load static %}
 
-{% block title %}Equipo #{{ equipo.numero }}{% endblock %}
-{% block page_title %}Detalles del Equipo{% endblock %}
-{% block page_subtitle %}#{{ equipo.numero }}{% endblock %}
+{% block title %}Equipo {{ equipo.numero }}{% endblock %}
+{% block page_title %}Equipo {{ equipo.numero }}{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-lg-8 mb-4">
-        <div class="dashboard-card">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h5 class="mb-0">Información del Equipo</h5>
-                    <small class="text-muted">Detalles y miembros del equipo</small>
+<!-- Breadcrumb -->
+<div class="breadcrumb-nav">
+    <a href="{% url 'equipos' %}" class="breadcrumb-link">
+        <i class="bi bi-arrow-left"></i>
+        Volver a Equipos
+    </a>
+</div>
+
+<div class="detail-container">
+    <!-- Columna principal -->
+    <div class="detail-main">
+        <!-- Header del equipo -->
+        <div class="card detail-header-card">
+            <div class="detail-header">
+                <div class="header-icon">
+                    <i class="bi bi-people-fill"></i>
                 </div>
-                <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
-                    <i class="bi bi-people-fill text-white fs-4"></i>
+                <div class="header-content">
+                    <h1>Equipo {{ equipo.numero }}</h1>
+                    <p>{{ equipo.nombre|default:"Sin nombre" }}</p>
+                </div>
+                <div class="header-badge">
+                    {% if request.user == equipo.jefe %}
+                        <span class="badge-large badge-success">
+                            <i class="bi bi-star-fill"></i>
+                            Eres el Jefe
+                        </span>
+                    {% else %}
+                        <span class="badge-large badge-primary">
+                            <i class="bi bi-person-check"></i>
+                            Miembro
+                        </span>
+                    {% endif %}
                 </div>
             </div>
-            
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <div class="p-3 border rounded bg-light">
-                        <small class="text-muted">Número de Equipo</small>
-                        <p class="mb-0 fw-bold fs-5">#{{ equipo.numero }}</p>
-                    </div>
+        </div>
+        
+        <!-- Información del equipo -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="bi bi-info-circle"></i>
+                    <h3>Información del Equipo</h3>
                 </div>
-                
-                <div class="col-md-6 mb-3">
-                    <div class="p-3 border rounded bg-light">
-                        <small class="text-muted">Jefe del Equipo</small>
-                        <p class="mb-0 fw-bold">
-                            <a href="{% url 'profile_user' equipo.jefe.id %}" class="text-decoration-none">
-                                <i class="bi bi-person-circle me-1"></i> {{ equipo.jefe.username }}
+            </div>
+            <div class="card-body">
+                <div class="info-grid-detail">
+                    <div class="info-box">
+                        <div class="info-box-icon bg-primary">
+                            <i class="bi bi-hash"></i>
+                        </div>
+                        <div class="info-box-content">
+                            <span class="info-box-label">Número</span>
+                            <span class="info-box-value">{{ equipo.numero }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <div class="info-box-icon bg-success">
+                            <i class="bi bi-person-badge"></i>
+                        </div>
+                        <div class="info-box-content">
+                            <span class="info-box-label">Jefe del Equipo</span>
+                            <a href="{% url 'profile_user' equipo.jefe.id %}" class="info-box-value info-box-link">
+                                {{ equipo.jefe.username }}
                             </a>
-                        </p>
+                        </div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <div class="info-box-icon bg-info">
+                            <i class="bi bi-calendar-plus"></i>
+                        </div>
+                        <div class="info-box-content">
+                            <span class="info-box-label">Creado</span>
+                            <span class="info-box-value">{{ equipo.created|timesince }} atrás</span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <div class="info-box-icon bg-warning">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <div class="info-box-content">
+                            <span class="info-box-label">Total de Miembros</span>
+                            <span class="info-box-value">{{ integrantes.count }}</span>
+                        </div>
                     </div>
                 </div>
                 
                 {% if equipo.descripcion %}
-                <div class="col-12 mb-3">
-                    <div class="p-3 border rounded bg-light">
-                        <small class="text-muted">Descripción</small>
-                        <p class="mb-0">{{ equipo.descripcion }}</p>
+                <div class="description-box">
+                    <div class="description-header">
+                        <i class="bi bi-text-left"></i>
+                        <h4>Descripción</h4>
                     </div>
+                    <p>{{ equipo.descripcion }}</p>
                 </div>
                 {% endif %}
-                
-                <div class="col-md-6 mb-3">
-                    <div class="p-3 border rounded bg-light">
-                        <small class="text-muted">Creado</small>
-                        <p class="mb-0">{{ equipo.created|timesince }}</p>
-                    </div>
-                </div>
-                
-                <div class="col-md-6 mb-3">
-                    <div class="p-3 border rounded bg-light">
-                        <small class="text-muted">Total de Miembros</small>
-                        <p class="mb-0 fw-bold">{{ integrantes.count }}</p>
-                    </div>
-                </div>
             </div>
-            
-            {% if equipo.jefe == request.user %}
-            <div class="mt-4 pt-3 border-top">
-                <h6>Acciones del Jefe</h6>
-                <div class="d-flex gap-2 mt-2">
-                    <a href="{% url 'equipo_update' equipo.id %}" class="btn btn-success">
-                        <i class="bi bi-pencil-square me-1"></i> Editar Equipo
-                    </a>
-                    <a href="{% url 'equipo_delete' equipo.id %}" class="btn btn-danger">
-                        <i class="bi bi-trash me-1"></i> Eliminar Equipo
-                    </a>
-                </div>
-            </div>
-            {% endif %}
         </div>
+        
+        <!-- Acciones (solo para jefe) -->
+        {% if equipo.jefe == request.user %}
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="bi bi-lightning-charge"></i>
+                    <h3>Acciones del Jefe</h3>
+                </div>
+            </div>
+            <div class="card-body">
+                <p class="action-description">Como jefe del equipo, puedes gestionar la información y miembros.</p>
+                <div class="action-buttons-grid">
+                    <a href="{% url 'equipo_update' equipo.id %}" class="btn btn-success btn-full">
+                        <i class="bi bi-pencil-square"></i>
+                        <span>Editar Equipo</span>
+                    </a>
+                    <button class="btn btn-danger btn-full" onclick="confirmDelete()">
+                        <i class="bi bi-trash"></i>
+                        <span>Eliminar Equipo</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
     
-    <div class="col-lg-4 mb-4">
-        <div class="dashboard-card">
-            <div class="d-flex align-items-center mb-3">
-                <div class="bg-primary bg-opacity-10 text-primary rounded p-2 me-3">
+    <!-- Sidebar - Miembros -->
+    <div class="detail-sidebar">
+        <div class="card members-card">
+            <div class="card-header">
+                <div class="card-title">
                     <i class="bi bi-people-fill"></i>
+                    <h3>Miembros</h3>
                 </div>
-                <div>
-                    <h5 class="mb-0">Miembros del Equipo</h5>
-                    <small class="text-muted">{{ integrantes.count }} integrantes</small>
+                <span class="members-count">{{ integrantes.count }}</span>
+            </div>
+            <div class="card-body">
+                <div class="members-list">
+                    {% for integrante in integrantes %}
+                    <div class="member-item">
+                        <a href="{% url 'profile_user' integrante.id %}" class="member-link">
+                            <div class="member-avatar-large">
+                                {{ integrante.username|slice:":1"|upper }}
+                            </div>
+                            <div class="member-info">
+                                <span class="member-name">{{ integrante.username }}</span>
+                                {% if integrante == equipo.jefe %}
+                                    <span class="member-role role-jefe">
+                                        <i class="bi bi-star-fill"></i> Jefe
+                                    </span>
+                                {% else %}
+                                    <span class="member-role role-integrante">
+                                        <i class="bi bi-person"></i> Integrante
+                                    </span>
+                                {% endif %}
+                            </div>
+                            <i class="bi bi-chevron-right member-arrow"></i>
+                        </a>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
-            
-            <div class="list-group list-group-flush">
-                {% for integrante in integrantes %}
-                <div class="list-group-item border-0 px-0 py-3">
-                    <div class="d-flex align-items-center">
-                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
-                            <span class="text-white fw-bold">{{ integrante.username|first|upper }}</span>
-                        </div>
-                        <div>
-                            <a href="{% url 'profile_user' integrante.id %}" class="text-decoration-none fw-bold">
-                                {{ integrante.username }}
-                            </a>
-                            <br>
-                            <small class="text-muted">
-                                {% if integrante == equipo.jefe %}
-                                <span class="badge bg-success">Jefe</span>
-                                {% else %}
-                                <span class="badge bg-primary">Integrante</span>
-                                {% endif %}
-                            </small>
-                        </div>
+        </div>
+        
+        <!-- Estadísticas rápidas -->
+        <div class="card stats-mini-card">
+            <h4>Estadísticas</h4>
+            <div class="stats-mini-list">
+                <div class="stat-mini-item">
+                    <i class="bi bi-calendar-check"></i>
+                    <div>
+                        <span class="stat-mini-value">{{ equipo.created|date:"d M Y" }}</span>
+                        <span class="stat-mini-label">Fecha de creación</span>
                     </div>
                 </div>
-                {% endfor %}
-            </div>
-            
-            <div class="mt-4">
-                <a href="{% url 'equipos' %}" class="btn btn-outline-secondary w-100">
-                    <i class="bi bi-arrow-left me-1"></i> Volver a Equipos
-                </a>
+                <div class="stat-mini-item">
+                    <i class="bi bi-clock-history"></i>
+                    <div>
+                        <span class="stat-mini-value">{{ equipo.updated|timesince }}</span>
+                        <span class="stat-mini-label">Última actualización</span>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Modal de confirmación (inline) -->
+<div class="modal-overlay" id="deleteModal">
+    <div class="modal-content">
+        <div class="modal-header-danger">
+            <i class="bi bi-exclamation-triangle"></i>
+            <h3>¿Eliminar equipo?</h3>
+        </div>
+        <div class="modal-body">
+            <p>Esta acción no se puede deshacer. Se eliminarán todos los datos relacionados con este equipo.</p>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeDeleteModal()">
+                Cancelar
+            </button>
+            <a href="{% url 'equipo_delete' equipo.id %}" class="btn btn-danger">
+                Sí, eliminar
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function confirmDelete() {
+    document.getElementById('deleteModal').classList.add('show');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeDeleteModal() {
+    document.getElementById('deleteModal').classList.remove('show');
+    document.body.style.overflow = '';
+}
+
+// Cerrar modal al hacer clic fuera
+document.getElementById('deleteModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeDeleteModal();
+    }
+});
+</script>
 {% endblock %}

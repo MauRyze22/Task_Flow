@@ -1,73 +1,309 @@
 {% extends 'main.html' %}
+{% load static %}
 
 {% block title %}Mis Tareas{% endblock %}
-{% block page_title %}Mis Tareas{% endblock %}
+{% block page_title %}Gestión de Tareas{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h5 class="mb-0">Gestión de Tareas</h5>
-        <small class="text-muted">Organiza y prioriza tus actividades</small>
+<!-- Header con toggle de vista -->
+<div class="page-header">
+    <div class="page-header-content">
+        <div class="page-header-text">
+            <h2>Gestión de Tareas</h2>
+            <p>Organiza y prioriza tus actividades</p>
+        </div>
+        <div class="header-actions">
+            <div class="view-toggle">
+                <button class="toggle-btn active" data-view="kanban">
+                    <i class="bi bi-kanban"></i>
+                    <span>Kanban</span>
+                </button>
+                <button class="toggle-btn" data-view="list">
+                    <i class="bi bi-list-ul"></i>
+                    <span>Lista</span>
+                </button>
+            </div>
+            <a href="{% url 'create_tarea' %}" class="btn btn-primary">
+                <i class="bi bi-plus-circle"></i>
+                <span>Nueva Tarea</span>
+            </a>
+        </div>
     </div>
-    <a href="{% url 'create_tarea' %}" class="btn btn-primary">
-        <i class="bi bi-plus-circle me-1"></i> Nueva Tarea
-    </a>
 </div>
 
-<!-- Filtros -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="dashboard-card">
-            <div class="row">
-                <div class="col-md-3 mb-2">
-                    <a href="#pendientes" class="btn btn-outline-warning w-100">
-                        <i class="bi bi-clock me-1"></i> Pendientes
-                        <span class="badge bg-warning ms-1">{{ tareas_pendientes.count }}</span>
-                    </a>
+<!-- Estadísticas rápidas -->
+<div class="tasks-stats">
+    <div class="stat-card stat-pending">
+        <div class="stat-icon">
+            <i class="bi bi-clock"></i>
+        </div>
+        <div class="stat-content">
+            <span class="stat-value">{{ tareas_pendientes|length }}</span>
+            <span class="stat-label">Pendientes</span>
+        </div>
+    </div>
+    
+    <div class="stat-card stat-progress">
+        <div class="stat-icon">
+            <i class="bi bi-arrow-right-circle"></i>
+        </div>
+        <div class="stat-content">
+            <span class="stat-value">{{ tareas_en_progreso|length }}</span>
+            <span class="stat-label">En Progreso</span>
+        </div>
+    </div>
+    
+    <div class="stat-card stat-completed">
+        <div class="stat-icon">
+            <i class="bi bi-check-circle"></i>
+        </div>
+        <div class="stat-content">
+            <span class="stat-value">{{ tareas_completadas|length }}</span>
+            <span class="stat-label">Completadas</span>
+        </div>
+    </div>
+    
+    <div class="stat-card stat-paused">
+        <div class="stat-icon">
+            <i class="bi bi-pause-circle"></i>
+        </div>
+        <div class="stat-content">
+            <span class="stat-value">{{ tareas_pausadas|length }}</span>
+            <span class="stat-label">Pausadas</span>
+        </div>
+    </div>
+</div>
+
+{% if tareas_pendientes or tareas_en_progreso or tareas_completadas or tareas_pausadas %}
+<!-- Vista Kanban -->
+<div class="kanban-view" id="kanbanView">
+    <div class="kanban-board">
+        <!-- Columna Pendientes -->
+        <div class="kanban-column">
+            <div class="column-header header-pending">
+                <div class="column-title">
+                    <i class="bi bi-clock"></i>
+                    <span>Pendientes</span>
                 </div>
-                <div class="col-md-3 mb-2">
-                    <a href="#en-progreso" class="btn btn-outline-primary w-100">
-                        <i class="bi bi-arrow-right-circle me-1"></i> En Progreso
-                        <span class="badge bg-primary ms-1">{{ tareas_en_progreso.count }}</span>
-                    </a>
+                <span class="column-count">{{ tareas_pendientes|length }}</span>
+            </div>
+            <div class="column-body">
+                {% for tarea in tareas_pendientes %}
+                <div class="task-card" data-task-id="{{ tarea.id }}">
+                    <div class="task-header">
+                        <h4>{{ tarea.contenido|truncatechars:50 }}</h4>
+                        <div class="task-actions-mini">
+                            <a href="{% url 'tarea_detail' tarea.id %}" class="task-action-btn" title="Ver">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            {% if request.user == tarea.asignado_a or request.user == tarea.proyecto.tutor %}
+                            <a href="{% url 'tarea_update' tarea.id %}" class="task-action-btn" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="task-meta">
+                        <a href="{% url 'proyecto_detail' tarea.proyecto.id %}" class="task-project">
+                            <i class="bi bi-folder"></i>
+                            {{ tarea.proyecto.name|truncatechars:25 }}
+                        </a>
+                    </div>
+                    
+                    <div class="task-footer">
+                        <div class="task-assignee">
+                            <div class="assignee-avatar">
+                                {{ tarea.asignado_a.username|slice:":1"|upper }}
+                            </div>
+                            <span>{{ tarea.asignado_a.username|truncatechars:15 }}</span>
+                        </div>
+                        {% if tarea.fecha_limite %}
+                        <div class="task-due-date {% if tarea.esta_vencida %}overdue{% elif tarea.dias_para_vencer != None and tarea.dias_para_vencer <= 3 %}warning{% endif %}">
+                            <i class="bi bi-calendar"></i>
+                            <span>{{ tarea.fecha_limite|date:"d M" }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
                 </div>
-                <div class="col-md-3 mb-2">
-                    <a href="#completadas" class="btn btn-outline-success w-100">
-                        <i class="bi bi-check-circle me-1"></i> Completadas
-                        <span class="badge bg-success ms-1">{{ tareas_completadas.count }}</span>
-                    </a>
+                {% empty %}
+                <div class="empty-column">
+                    <i class="bi bi-inbox"></i>
+                    <p>No hay tareas</p>
                 </div>
-                <div class="col-md-3 mb-2">
-                    <a href="#pausadas" class="btn btn-outline-secondary w-100">
-                        <i class="bi bi-pause-circle me-1"></i> Pausadas
-                        <span class="badge bg-secondary ms-1">{{ tareas_pausadas.count }}</span>
-                    </a>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Columna En Progreso -->
+        <div class="kanban-column">
+            <div class="column-header header-progress">
+                <div class="column-title">
+                    <i class="bi bi-arrow-right-circle"></i>
+                    <span>En Progreso</span>
                 </div>
+                <span class="column-count">{{ tareas_en_progreso|length }}</span>
+            </div>
+            <div class="column-body">
+                {% for tarea in tareas_en_progreso %}
+                <div class="task-card" data-task-id="{{ tarea.id }}">
+                    <div class="task-header">
+                        <h4>{{ tarea.contenido|truncatechars:50 }}</h4>
+                        <div class="task-actions-mini">
+                            <a href="{% url 'tarea_detail' tarea.id %}" class="task-action-btn">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            {% if request.user == tarea.asignado_a or request.user == tarea.proyecto.tutor %}
+                            <a href="{% url 'tarea_update' tarea.id %}" class="task-action-btn">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="task-meta">
+                        <a href="{% url 'proyecto_detail' tarea.proyecto.id %}" class="task-project">
+                            <i class="bi bi-folder"></i>
+                            {{ tarea.proyecto.name|truncatechars:25 }}
+                        </a>
+                    </div>
+                    
+                    <div class="task-footer">
+                        <div class="task-assignee">
+                            <div class="assignee-avatar">
+                                {{ tarea.asignado_a.username|slice:":1"|upper }}
+                            </div>
+                            <span>{{ tarea.asignado_a.username|truncatechars:15 }}</span>
+                        </div>
+                        {% if tarea.fecha_limite %}
+                        <div class="task-due-date {% if tarea.esta_vencida %}overdue{% elif tarea.dias_para_vencer != None and tarea.dias_para_vencer <= 3 %}warning{% endif %}">
+                            <i class="bi bi-calendar"></i>
+                            <span>{{ tarea.fecha_limite|date:"d M" }}</span>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-column">
+                    <i class="bi bi-inbox"></i>
+                    <p>No hay tareas</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Columna Completadas -->
+        <div class="kanban-column">
+            <div class="column-header header-completed">
+                <div class="column-title">
+                    <i class="bi bi-check-circle"></i>
+                    <span>Completadas</span>
+                </div>
+                <span class="column-count">{{ tareas_completadas|length }}</span>
+            </div>
+            <div class="column-body">
+                {% for tarea in tareas_completadas %}
+                <div class="task-card task-completed" data-task-id="{{ tarea.id }}">
+                    <div class="task-header">
+                        <h4>{{ tarea.contenido|truncatechars:50 }}</h4>
+                        <div class="task-actions-mini">
+                            <a href="{% url 'tarea_detail' tarea.id %}" class="task-action-btn">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="task-meta">
+                        <a href="{% url 'proyecto_detail' tarea.proyecto.id %}" class="task-project">
+                            <i class="bi bi-folder"></i>
+                            {{ tarea.proyecto.name|truncatechars:25 }}
+                        </a>
+                    </div>
+                    
+                    <div class="task-footer">
+                        <div class="task-assignee">
+                            <div class="assignee-avatar">
+                                {{ tarea.asignado_a.username|slice:":1"|upper }}
+                            </div>
+                            <span>{{ tarea.asignado_a.username|truncatechars:15 }}</span>
+                        </div>
+                        <div class="task-check">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-column">
+                    <i class="bi bi-inbox"></i>
+                    <p>No hay tareas</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Columna Pausadas -->
+        <div class="kanban-column">
+            <div class="column-header header-paused">
+                <div class="column-title">
+                    <i class="bi bi-pause-circle"></i>
+                    <span>Pausadas</span>
+                </div>
+                <span class="column-count">{{ tareas_pausadas|length }}</span>
+            </div>
+            <div class="column-body">
+                {% for tarea in tareas_pausadas %}
+                <div class="task-card" data-task-id="{{ tarea.id }}">
+                    <div class="task-header">
+                        <h4>{{ tarea.contenido|truncatechars:50 }}</h4>
+                        <div class="task-actions-mini">
+                            <a href="{% url 'tarea_detail' tarea.id %}" class="task-action-btn">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            {% if request.user == tarea.asignado_a or request.user == tarea.proyecto.tutor %}
+                            <a href="{% url 'tarea_update' tarea.id %}" class="task-action-btn">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="task-meta">
+                        <a href="{% url 'proyecto_detail' tarea.proyecto.id %}" class="task-project">
+                            <i class="bi bi-folder"></i>
+                            {{ tarea.proyecto.name|truncatechars:25 }}
+                        </a>
+                    </div>
+                    
+                    <div class="task-footer">
+                        <div class="task-assignee">
+                            <div class="assignee-avatar">
+                                {{ tarea.asignado_a.username|slice:":1"|upper }}
+                            </div>
+                            <span>{{ tarea.asignado_a.username|truncatechars:15 }}</span>
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="empty-column">
+                    <i class="bi bi-inbox"></i>
+                    <p>No hay tareas</p>
+                </div>
+                {% endfor %}
             </div>
         </div>
     </div>
 </div>
 
-<!-- Tareas Pendientes -->
-{% if tareas_pendientes %}
-<div class="dashboard-card mb-4" id="pendientes">
-    <div class="d-flex align-items-center mb-3">
-        <div class="bg-warning bg-opacity-10 text-warning rounded p-2 me-3">
-            <i class="bi bi-clock-fill"></i>
-        </div>
-        <div>
-            <h5 class="mb-0">Tareas Pendientes</h5>
-            <small class="text-muted">{{ tareas_pendientes.count }} tareas por realizar</small>
-        </div>
-    </div>
-    
-    <div class="table-responsive">
-        <table class="table table-hover">
+<!-- Vista Lista (oculta por defecto) -->
+<div class="list-view" id="listView" style="display: none;">
+    <div class="tasks-table-container card">
+        <table class="tasks-table">
             <thead>
                 <tr>
                     <th>Tarea</th>
                     <th>Proyecto</th>
                     <th>Asignado a</th>
+                    <th>Estado</th>
                     <th>Fecha Límite</th>
                     <th>Acciones</th>
                 </tr>
@@ -75,208 +311,57 @@
             <tbody>
                 {% for tarea in tareas_pendientes %}
                 <tr>
+                    <td><strong>{{ tarea.contenido|truncatechars:50 }}</strong></td>
+                    <td><a href="{% url 'proyecto_detail' tarea.proyecto.id %}">{{ tarea.proyecto.name|truncatechars:25 }}</a></td>
+                    <td>{{ tarea.asignado_a.username }}</td>
+                    <td><span class="table-badge badge-pending">Pendiente</span></td>
+                    <td>{{ tarea.fecha_limite|date:"d M Y"|default:"Sin fecha" }}</td>
                     <td>
-                        <a href="{% url 'tarea_detail' tarea.id %}" class="text-decoration-none fw-bold">
-                            {{ tarea.contenido|truncatechars:40 }}
-                        </a>
-                    </td>
-                    <td>
-                        <a href="{% url 'proyecto_detail' tarea.proyecto.id %}" class="text-decoration-none">
-                            {{ tarea.proyecto.nombre|truncatechars:20 }}
-                        </a>
-                    </td>
-                    <td>
-                        <a href="{% url 'profile_user' tarea.asignado_a.id %}" class="text-decoration-none">
-                            {{ tarea.asignado_a.username }}
-                        </a>
-                    </td>
-                    <td>
-                        {% if tarea.fecha_limite %}
-                        <span class="{% if tarea.dias_para_vencer <= 3 %}text-danger fw-bold{% endif %}">
-                            {{ tarea.fecha_limite|date:"d M Y" }}
-                        </span>
-                        {% else %}
-                        <span class="text-muted">Sin fecha</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <a href="{% url 'tarea_detail' tarea.id %}" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-eye"></i>
-                        </a>
+                        <a href="{% url 'tarea_detail' tarea.id %}" class="table-action-btn"><i class="bi bi-eye"></i></a>
                         {% if request.user == tarea.asignado_a or request.user == tarea.proyecto.tutor %}
-                        <a href="{% url 'tarea_update' tarea.id %}" class="btn btn-sm btn-outline-success">
-                            <i class="bi bi-pencil"></i>
-                        </a>
+                        <a href="{% url 'tarea_update' tarea.id %}" class="table-action-btn"><i class="bi bi-pencil"></i></a>
                         {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-{% endif %}
-
-<!-- Tareas En Progreso -->
-{% if tareas_en_progreso %}
-<div class="dashboard-card mb-4" id="en-progreso">
-    <div class="d-flex align-items-center mb-3">
-        <div class="bg-primary bg-opacity-10 text-primary rounded p-2 me-3">
-            <i class="bi bi-arrow-right-circle-fill"></i>
-        </div>
-        <div>
-            <h5 class="mb-0">Tareas En Progreso</h5>
-            <small class="text-muted">{{ tareas_en_progreso.count }} tareas en ejecución</small>
-        </div>
-    </div>
-    
-    <div class="table-responsive">
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>Tarea</th>
-                    <th>Proyecto</th>
-                    <th>Progreso</th>
-                    <th>Última Actualización</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
                 {% for tarea in tareas_en_progreso %}
                 <tr>
+                    <td><strong>{{ tarea.contenido|truncatechars:50 }}</strong></td>
+                    <td><a href="{% url 'proyecto_detail' tarea.proyecto.id %}">{{ tarea.proyecto.name|truncatechars:25 }}</a></td>
+                    <td>{{ tarea.asignado_a.username }}</td>
+                    <td><span class="table-badge badge-progress">En Progreso</span></td>
+                    <td>{{ tarea.fecha_limite|date:"d M Y"|default:"Sin fecha" }}</td>
                     <td>
-                        <a href="{% url 'tarea_detail' tarea.id %}" class="text-decoration-none fw-bold">
-                            {{ tarea.contenido|truncatechars:40 }}
-                        </a>
-                    </td>
-                    <td>
-                        <a href="{% url 'proyecto_detail' tarea.proyecto.id %}" class="text-decoration-none">
-                            {{ tarea.proyecto.nombre|truncatechars:20 }}
-                        </a>
-                    </td>
-                    <td>
-                        <div class="progress" style="height: 8px;">
-                            <div class="progress-bar bg-primary" style="width: {{ tarea.progreso|default:0 }}%"></div>
-                        </div>
-                        <small>{{ tarea.progreso|default:0 }}%</small>
-                    </td>
-                    <td>{{ tarea.updated|timesince }}</td>
-                    <td>
-                        <a href="{% url 'tarea_detail' tarea.id %}" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-eye"></i>
-                        </a>
+                        <a href="{% url 'tarea_detail' tarea.id %}" class="table-action-btn"><i class="bi bi-eye"></i></a>
+                        {% if request.user == tarea.asignado_a or request.user == tarea.proyecto.tutor %}
+                        <a href="{% url 'tarea_update' tarea.id %}" class="table-action-btn"><i class="bi bi-pencil"></i></a>
+                        {% endif %}
                     </td>
                 </tr>
                 {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-{% endif %}
-
-<!-- Tareas Completadas -->
-{% if tareas_completadas %}
-<div class="dashboard-card mb-4" id="completadas">
-    <div class="d-flex align-items-center mb-3">
-        <div class="bg-success bg-opacity-10 text-success rounded p-2 me-3">
-            <i class="bi bi-check-circle-fill"></i>
-        </div>
-        <div>
-            <h5 class="mb-0">Tareas Completadas</h5>
-            <small class="text-muted">{{ tareas_completadas.count }} tareas finalizadas</small>
-        </div>
-    </div>
-    
-    <div class="table-responsive">
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>Tarea</th>
-                    <th>Proyecto</th>
-                    <th>Completada por</th>
-                    <th>Fecha Completada</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
                 {% for tarea in tareas_completadas %}
                 <tr>
+                    <td><strong>{{ tarea.contenido|truncatechars:50 }}</strong></td>
+                    <td><a href="{% url 'proyecto_detail' tarea.proyecto.id %}">{{ tarea.proyecto.name|truncatechars:25 }}</a></td>
+                    <td>{{ tarea.asignado_a.username }}</td>
+                    <td><span class="table-badge badge-completed">Completada</span></td>
+                    <td>{{ tarea.fecha_limite|date:"d M Y"|default:"Sin fecha" }}</td>
                     <td>
-                        <a href="{% url 'tarea_detail' tarea.id %}" class="text-decoration-none fw-bold">
-                            {{ tarea.contenido|truncatechars:40 }}
-                        </a>
-                    </td>
-                    <td>
-                        <a href="{% url 'proyecto_detail' tarea.proyecto.id %}" class="text-decoration-none">
-                            {{ tarea.proyecto.nombre|truncatechars:20 }}
-                        </a>
-                    </td>
-                    <td>
-                        <a href="{% url 'profile_user' tarea.asignado_a.id %}" class="text-decoration-none">
-                            {{ tarea.asignado_a.username }}
-                        </a>
-                    </td>
-                    <td>{{ tarea.fecha_completada|default:"-"|date:"d M Y" }}</td>
-                    <td>
-                        <a href="{% url 'tarea_detail' tarea.id %}" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-eye"></i>
-                        </a>
+                        <a href="{% url 'tarea_detail' tarea.id %}" class="table-action-btn"><i class="bi bi-eye"></i></a>
                     </td>
                 </tr>
                 {% endfor %}
-            </tbody>
-        </table>
-    </div>
-</div>
-{% endif %}
-
-<!-- Tareas Pausadas -->
-{% if tareas_pausadas %}
-<div class="dashboard-card" id="pausadas">
-    <div class="d-flex align-items-center mb-3">
-        <div class="bg-secondary bg-opacity-10 text-secondary rounded p-2 me-3">
-            <i class="bi bi-pause-circle-fill"></i>
-        </div>
-        <div>
-            <h5 class="mb-0">Tareas Pausadas</h5>
-            <small class="text-muted">{{ tareas_pausadas.count }} tareas en pausa</small>
-        </div>
-    </div>
-    
-    <div class="table-responsive">
-        <table class="table table-hover">
-            <thead>
-                <tr>
-                    <th>Tarea</th>
-                    <th>Proyecto</th>
-                    <th>Razón</th>
-                    <th>Fecha Pausa</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody>
                 {% for tarea in tareas_pausadas %}
                 <tr>
+                    <td><strong>{{ tarea.contenido|truncatechars:50 }}</strong></td>
+                    <td><a href="{% url 'proyecto_detail' tarea.proyecto.id %}">{{ tarea.proyecto.name|truncatechars:25 }}</a></td>
+                    <td>{{ tarea.asignado_a.username }}</td>
+                    <td><span class="table-badge badge-paused">Pausada</span></td>
+                    <td>{{ tarea.fecha_limite|date:"d M Y"|default:"Sin fecha" }}</td>
                     <td>
-                        <a href="{% url 'tarea_detail' tarea.id %}" class="text-decoration-none fw-bold">
-                            {{ tarea.contenido|truncatechars:40 }}
-                        </a>
-                    </td>
-                    <td>
-                        <a href="{% url 'proyecto_detail' tarea.proyecto.id %}" class="text-decoration-none">
-                            {{ tarea.proyecto.nombre|truncatechars:20 }}
-                        </a>
-                    </td>
-                    <td>{{ tarea.razon_pausa|default:"-"|truncatechars:30 }}</td>
-                    <td>{{ tarea.fecha_pausa|default:"-"|date:"d M Y" }}</td>
-                    <td>
-                        <a href="{% url 'tarea_detail' tarea.id %}" class="btn btn-sm btn-outline-primary">
-                            <i class="bi bi-eye"></i>
-                        </a>
+                        <a href="{% url 'tarea_detail' tarea.id %}" class="table-action-btn"><i class="bi bi-eye"></i></a>
                         {% if request.user == tarea.asignado_a or request.user == tarea.proyecto.tutor %}
-                        <a href="{% url 'tarea_update' tarea.id %}" class="btn btn-sm btn-outline-success">
-                            <i class="bi bi-pencil"></i>
-                        </a>
+                        <a href="{% url 'tarea_update' tarea.id %}" class="table-action-btn"><i class="bi bi-pencil"></i></a>
                         {% endif %}
                     </td>
                 </tr>
@@ -285,18 +370,55 @@
         </table>
     </div>
 </div>
-{% endif %}
 
-{% if not tareas_pendientes and not tareas_en_progreso and not tareas_completadas and not tareas_pausadas %}
-<div class="text-center py-5 my-5">
-    <div class="bg-light rounded-circle d-inline-flex align-items-center justify-content-center mb-4" style="width: 120px; height: 120px;">
-        <i class="bi bi-check2-all display-4 text-muted"></i>
+{% else %}
+<!-- Empty State -->
+<div class="empty-state-large">
+    <div class="empty-icon">
+        <i class="bi bi-check2-all"></i>
     </div>
-    <h4 class="text-muted">No tienes tareas asignadas</h4>
-    <p class="text-muted mb-4">Crea tu primera tarea o espera a que te asignen una.</p>
-    <a href="{% url 'create_tarea' %}" class="btn btn-primary btn-lg">
-        <i class="bi bi-plus-circle me-2"></i> Crear Mi Primera Tarea
+    <h3>No tienes tareas asignadas</h3>
+    <p>Crea tu primera tarea para comenzar a organizar tu trabajo y colaborar con tu equipo.</p>
+    <a href="{% url 'create_tarea' %}" class="btn btn-primary btn-large">
+        <i class="bi bi-plus-circle"></i>
+        <span>Crear Mi Primera Tarea</span>
     </a>
 </div>
 {% endif %}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Toggle entre vista Kanban y Lista
+document.addEventListener('DOMContentLoaded', function() {
+    const toggleBtns = document.querySelectorAll('.toggle-btn');
+    const kanbanView = document.getElementById('kanbanView');
+    const listView = document.getElementById('listView');
+    
+    toggleBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const view = this.dataset.view;
+            
+            // Update active button
+            toggleBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Toggle views
+            if (view === 'kanban') {
+                kanbanView.style.display = 'block';
+                listView.style.display = 'none';
+            } else {
+                kanbanView.style.display = 'none';
+                listView.style.display = 'block';
+            }
+        });
+    });
+    
+    // Animación de entrada para task cards
+    const taskCards = document.querySelectorAll('.task-card');
+    taskCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.05}s`;
+    });
+});
+</script>
 {% endblock %}

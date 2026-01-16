@@ -1,0 +1,68 @@
+{% extends "main.html" %}
+{% load static %}
+
+{% block title %}Miembros{% endblock %}
+{% block page_title %}Directorio de Miembros{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="page-header">
+    <div class="page-header-content">
+        <div class="page-header-text">
+            <h2>Miembros de TaskFlow</h2>
+            <p>Todos los usuarios registrados en la plataforma</p>
+        </div>
+    </div>
+</div>
+
+<!-- Grid de perfiles -->
+<div class="members-grid">
+    {% for perfil in perfiles %}
+    <div class="member-card">
+        <div class="member-card-avatar">
+            {% if perfil.imagen and perfil.imagen.name %}
+                <img src="{{ perfil.imagen.url }}" alt="{{ perfil.user.username }}">
+            {% else %}
+                <div class="member-avatar-placeholder">
+                    {{ perfil.user.username|slice:":1"|upper }}
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="member-card-info">
+            <h3>{{ perfil.user.username }}</h3>
+            <span class="member-role">{{ perfil.rol|default:"Usuario" }}</span>
+            
+            <div class="member-meta">
+                {% if perfil.email %}
+                <div class="member-meta-item">
+                    <i class="bi bi-envelope"></i>
+                    <span>{{ perfil.email|truncatechars:25 }}</span>
+                </div>
+                {% endif %}
+                
+                {% if perfil.pais and perfil.pais != "No registrado" %}
+                <div class="member-meta-item">
+                    <i class="bi bi-geo-alt"></i>
+                    <span>{{ perfil.pais }}</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <a href="{% url 'profile_user' perfil.user.id %}" class="member-card-link">
+            <span>Ver Perfil</span>
+            <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+    {% empty %}
+    <div class="empty-state-large" style="grid-column: 1/-1;">
+        <div class="empty-icon">
+            <i class="bi bi-people"></i>
+        </div>
+        <h3>No hay miembros registrados</h3>
+        <p>Aún no hay usuarios en la plataforma.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

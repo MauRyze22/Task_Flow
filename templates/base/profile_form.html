@@ -1,82 +1,311 @@
 {% extends 'main.html' %}
+{% load static %}
 
 {% block title %}Editar Perfil{% endblock %}
 {% block page_title %}Editar Perfil{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-lg-8">
-        <div class="dashboard-card">
-            <div class="d-flex align-items-center mb-4">
-                <div class="icon-team me-3">
-                    <i class="bi bi-person-badge"></i>
-                </div>
-                <div>
-                    <h5 class="mb-0">Actualizar Información Personal</h5>
-                    <p class="text-muted mb-0">Completa o modifica tus datos de perfil</p>
-                </div>
+<div class="form-page-container">
+    <div class="form-card">
+        <!-- Header del formulario -->
+        <div class="form-header">
+            <div class="form-icon">
+                <i class="bi bi-person-badge"></i>
             </div>
+            <div class="form-header-text">
+                <h2>Actualizar Información Personal</h2>
+                <p>Completa o modifica tus datos de perfil</p>
+            </div>
+        </div>
+        
+        <!-- Formulario -->
+        <form method="POST" enctype="multipart/form-data" class="profile-form" id="profileForm">
+            {% csrf_token %}
             
-            <form method="POST" class="mt-3">
-                {% csrf_token %}
-                
-                <div class="row">
-                    {% for field in form %}
-                    <div class="col-md-6 mb-3">
-                        <label for="{{ field.id_for_label }}" class="form-label fw-bold">
-                            {{ field.label }}
-                        </label>
-                        {{ field }}
-                        {% if field.help_text %}
-                        <div class="form-text text-muted">{{ field.help_text }}</div>
+            <div class="form-grid">
+                {% for field in form %}
+                <div class="form-field {% if field.field.required %}required{% endif %} {% if 'imagen' in field.name %}field-full-width{% endif %}">
+                    <label for="{{ field.id_for_label }}" class="field-label">
+                        {{ field.label }}
+                        {% if field.field.required %}<span class="required-mark">*</span>{% endif %}
+                    </label>
+                    
+                    {% if 'imagen' not in field.name %}
+                    <div class="field-wrapper {% if field.errors %}has-error{% endif %}">
+                        {% if field.field.widget.input_type == 'select' %}
+                            <i class="field-icon bi bi-list"></i>
+                        {% elif 'email' in field.name %}
+                            <i class="field-icon bi bi-envelope"></i>
+                        {% elif 'numero' in field.name or 'phone' in field.name %}
+                            <i class="field-icon bi bi-phone"></i>
+                        {% elif 'pais' in field.name or 'country' in field.name %}
+                            <i class="field-icon bi bi-globe"></i>
+                        {% elif 'rol' in field.name or 'role' in field.name %}
+                            <i class="field-icon bi bi-person-badge"></i>
+                        {% else %}
+                            <i class="field-icon bi bi-pencil"></i>
                         {% endif %}
+                        
+                        {{ field }}
+                        
                         {% if field.errors %}
-                        <div class="text-danger small mt-1">
-                            {{ field.errors }}
-                        </div>
+                        <i class="field-status bi bi-exclamation-circle"></i>
                         {% endif %}
                     </div>
-                    {% endfor %}
+                    {% else %}
+                    <!-- Campo de imagen personalizado -->
+                    <div class="image-upload-wrapper">
+                        <!-- Preview de imagen actual -->
+                        <div class="image-preview-container" id="imagePreviewContainer">
+                            {% if form.instance.imagen and form.instance.imagen.name %}
+                            <img src="{{ form.instance.imagen.url }}" alt="Imagen actual" id="imagePreview">
+                            {% else %}
+                            <div class="image-placeholder" id="imagePlaceholder">
+                                <i class="bi bi-person-circle"></i>
+                                <p>Sin imagen</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Input file oculto -->
+                        {{ field }}
+                        
+                        <!-- Botón personalizado -->
+                        <label for="{{ field.id_for_label }}" class="btn-upload">
+                            <i class="bi bi-cloud-upload"></i>
+                            <span>Elegir imagen</span>
+                        </label>
+                        
+                        <small class="upload-hint">
+                            <i class="bi bi-info-circle"></i>
+                            Formatos: JPG, PNG, GIF. Tamaño máximo: 5MB
+                        </small>
+                    </div>
+                    {% endif %}
+                    
+                    {% if field.help_text and 'imagen' not in field.name %}
+                    <small class="field-help">{{ field.help_text }}</small>
+                    {% endif %}
+                    
+                    {% if field.errors %}
+                    <div class="field-error">
+                        <i class="bi bi-x-circle"></i>
+                        {% for error in field.errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
                 </div>
-                
-                <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
-                    <a href="{% url 'profile_user' request.user.id %}" class="btn btn-outline-secondary">
-                        <i class="bi bi-arrow-left me-1"></i> Cancelar
-                    </a>
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-check-circle me-1"></i> Guardar Cambios
-                    </button>
-                </div>
-            </form>
+                {% endfor %}
+            </div>
+            
+            <!-- Botones de acción -->
+            <div class="form-actions">
+                <a href="{% url 'profile_user' request.user.id %}" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i>
+                    <span>Cancelar</span>
+                </a>
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    <i class="bi bi-check-circle"></i>
+                    <span>Guardar Cambios</span>
+                </button>
+            </div>
+        </form>
+        
+        <!-- Info de ayuda -->
+        <div class="form-info">
+            <i class="bi bi-info-circle"></i>
+            <p>Los campos marcados con <span class="required-mark">*</span> son obligatorios. Asegúrate de completar toda la información correctamente.</p>
         </div>
     </div>
 </div>
 
 <style>
-    /* Estilos para formularios */
-    input, select, textarea {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        transition: all 0.3s;
-        font-size: 14px;
-    }
-    
-    input:focus, select:focus, textarea:focus {
-        border-color: var(--primary);
-        box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.1);
-        outline: none;
-    }
-    
-    .form-label {
-        font-weight: 500;
-        margin-bottom: 8px;
-        color: #495057;
-    }
-    
-    .form-text {
-        font-size: 12px;
-    }
+/* Estilos para el campo de imagen personalizado */
+.field-full-width {
+    grid-column: 1 / -1;
+}
+
+.image-upload-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 2px dashed #dee2e6;
+}
+
+.image-preview-container {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #fff;
+    border: 3px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.image-preview-container img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.image-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #adb5bd;
+    text-align: center;
+}
+
+.image-placeholder i {
+    font-size: 4rem;
+    margin-bottom: 0.5rem;
+}
+
+.image-placeholder p {
+    margin: 0;
+    font-size: 0.875rem;
+}
+
+/* Ocultar el input file por defecto */
+.image-upload-wrapper input[type="file"] {
+    display: none;
+}
+
+.btn-upload {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: #6366f1;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-upload:hover {
+    background: #4f46e5;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+}
+
+.btn-upload i {
+    font-size: 1.1rem;
+}
+
+.upload-hint {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #6c757d;
+    font-size: 0.813rem;
+    text-align: center;
+}
+
+.upload-hint i {
+    color: #6366f1;
+}
 </style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Validación en tiempo real y efectos visuales
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('profileForm');
+    const inputs = form.querySelectorAll('input[type="text"], input[type="email"], input[type="tel"], select, textarea');
+    
+    // Animación al hacer focus
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            const wrapper = this.closest('.field-wrapper');
+            if (wrapper) {
+                wrapper.classList.add('focused');
+            }
+        });
+        
+        input.addEventListener('blur', function() {
+            const wrapper = this.closest('.field-wrapper');
+            if (wrapper) {
+                wrapper.classList.remove('focused');
+                
+                // Validar campo
+                if (this.value.trim() !== '') {
+                    wrapper.classList.add('has-value');
+                } else {
+                    wrapper.classList.remove('has-value');
+                }
+            }
+        });
+        
+        // Marcar campos con valor inicial
+        if (input.value.trim() !== '') {
+            const wrapper = input.closest('.field-wrapper');
+            if (wrapper) {
+                wrapper.classList.add('has-value');
+            }
+        }
+    });
+    
+    // Preview de imagen mejorado
+    const imageInput = document.querySelector('input[type="file"]');
+    if (imageInput) {
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    const previewContainer = document.getElementById('imagePreviewContainer');
+                    const placeholder = document.getElementById('imagePlaceholder');
+                    
+                    // Remover placeholder si existe
+                    if (placeholder) {
+                        placeholder.remove();
+                    }
+                    
+                    // Crear o actualizar la imagen
+                    let img = document.getElementById('imagePreview');
+                    if (!img) {
+                        img = document.createElement('img');
+                        img.id = 'imagePreview';
+                        img.alt = 'Vista previa';
+                        previewContainer.appendChild(img);
+                    }
+                    
+                    img.src = event.target.result;
+                    
+                    // Animación suave
+                    img.style.opacity = '0';
+                    setTimeout(() => {
+                        img.style.transition = 'opacity 0.3s ease';
+                        img.style.opacity = '1';
+                    }, 10);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    
+    // Animación al enviar
+    form.addEventListener('submit', function(e) {
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = submitBtn.querySelector('span');
+        const btnIcon = submitBtn.querySelector('i');
+        
+        submitBtn.disabled = true;
+        btnIcon.className = 'bi bi-arrow-clockwise rotating';
+        btnText.textContent = 'Guardando...';
+    });
+});
+</script>
 {% endblock %}
