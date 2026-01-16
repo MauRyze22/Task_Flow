@@ -150,7 +150,7 @@
     
     <!-- Sidebar - Estadísticas y Acciones -->
     <div class="detail-sidebar">
-        <!-- Estadísticas del proyecto -->
+        <!-- Estadísticas simplificadas -->
         <div class="card">
             <div class="card-header">
                 <div class="card-title">
@@ -167,30 +167,6 @@
                         <div class="stat-item-content">
                             <span class="stat-item-label">Tareas Totales</span>
                             <span class="stat-item-value">{{ proyecto.tareas.count }}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-item">
-                        <div class="stat-item-icon bg-success">
-                            <i class="bi bi-check-circle"></i>
-                        </div>
-                        <div class="stat-item-content">
-                            <span class="stat-item-label">Completadas</span>
-                            <span class="stat-item-value">
-                                {{ proyecto.tareas.filter|length|default:0 }}
-                            </span>
-                        </div>
-                    </div>
-                    
-                    <div class="stat-item">
-                        <div class="stat-item-icon bg-warning">
-                            <i class="bi bi-clock"></i>
-                        </div>
-                        <div class="stat-item-content">
-                            <span class="stat-item-label">Pendientes</span>
-                            <span class="stat-item-value">
-                                {{ proyecto.tareas.filter|length|default:0 }}
-                            </span>
                         </div>
                     </div>
                     
