@@ -48,10 +48,11 @@ def login_user(request):
 
         if user is not None:
 
-            try:
-                perfil = get_object_or_404(Perfil.objects.select_related('user'), user=user)
-            except Perfil.DoesNotExist:
-                perfil = Perfil.objects.create(user=user)
+            if not hasattr(user, 'Perfil'):
+                Perfil.objects.create(
+                    user = user,
+                    email = user.email if user.email else ""
+                )
 
             login(request, user)
             return redirect('home')
