@@ -3,9 +3,9 @@
 "Gestión inteligente de tareas, proyectos y equipos — con roles, invitaciones seguras y colaboración real."
 
 <!-- Badge opcionales (muy recomendados) -->
-![GitHub top language](https://img.shields.io/github/languages/top/tu-usuario/nombre-repo)
-![GitHub stars](https://img.shields.io/github/stars/tu-usuario/nombre-repo?style=social)
-![GitHub last commit](https://img.shields.io/github/last-commit/tu-usuario/nombre-repo)
+![GitHub top language](https://img.shields.io/github/languages/top/MauRyze22/Task_Flow)
+![GitHub stars](https://img.shields.io/github/stars/MauRyze22/Task_Flow?style=social)
+![GitHub last commit](https://img.shields.io/github/last-commit/MauRyze22/Task_Flow)
 
 ## 📖 Descripción
 
@@ -43,7 +43,7 @@ git clone https://github.com/MauRyze22/Task_Flow.git
 cd Task_Flow
 
 # Instalar dependencias
-npm install    # o yarn install / pip install -r requirements.txt
+pip install -r requirements.txt
 
 # Iniciar el proyecto
-npm run dev    # o python main.py / npm start
+python manage.py runserver
