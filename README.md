@@ -29,20 +29,18 @@ Aquí va lo más importante para portafolio → que se vea el resultado
 
 ## 🛠️ Tecnologías utilizadas
 - HTML5 / CSS3 / JavaScript
-- React / Next.js / Vue
-- Tailwind CSS / Bootstrap
-- Node.js / Express / Python + Flask
-- Firebase / Supabase / MongoDB
-- etc.
+- Bootstrap
+- Python + Django
+- PostgresSQL
 
 ## ⚙️ Instalación y ejecución (si aplica)
 
 ```bash
 # Clonar el repositorio
-git clone https://github.com/tu-usuario/nombre-del-repo.git
+git clone https://github.com/MauRyze22/Task_Flow.git
 
 # Entrar a la carpeta
-cd nombre-del-repo
+cd Task_Flow
 
 # Instalar dependencias
 npm install    # o yarn install / pip install -r requirements.txt
