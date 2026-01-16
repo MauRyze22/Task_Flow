@@ -100,7 +100,7 @@ Estoy aprendiendo y mejorando constantemente, así que cualquier feedback, suger
 
 📧 Email: amaurymonteagudop22@gmail.com  
 🔗 GitHub: [@MauRyze22](https://github.com/MauRyze22)  
-🔗 LinkedIn: [linkedin.com/in/amaury-monteagudo](https://www.linkedin.com/in/amaury-monteagudo)
+🔗 LinkedIn: [linkedin.com/in/amaury-monteagudo](https://www.linkedin.com/in/amaury-monteagudo-40375b3a5)
 
 ¡Gracias por tomarte el tiempo de ver mi proyecto! 🚀 Cualquier comentario suma muchísimo. 💙
 
