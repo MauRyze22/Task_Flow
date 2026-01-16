@@ -43,7 +43,7 @@ git clone https://github.com/MauRyze22/Task_Flow.git
 cd Task_Flow
 
 # Instalar dependencias
-pip install -r requirements.txt
+npm install    # o yarn install / pip install -r requirements.txt
 
 # Iniciar el proyecto
-python manage.py runserver
+npm run dev    # o python manage.py runserver/ npm start
