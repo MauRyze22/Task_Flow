@@ -23,7 +23,9 @@ Ideal para equipos pequeños y medianos que buscan una solución sencilla pero p
 Aquí va lo más importante para portafolio → que se vea el resultado
 
 - 🌐 **Demo en vivo**: [https://tu-proyecto.vercel.app](https://tu-proyecto.vercel.app)  
-- 📱 **Capturas de pantalla** o **GIF** (muy recomendado)
+- 📱 **Capturas de pantalla**: 
+
+![alt text](<Captura de pantalla_16-1-2026_1323_localhost.jpeg>) ![alt text](<Captura de pantalla_16-1-2026_13035_localhost.jpeg>) ![alt text](<Captura de pantalla_16-1-2026_13927_localhost.jpeg>) ![alt text](<Captura de pantalla_16-1-2026_13948_localhost (1).jpeg>)
 
 <!-- Aquí pondrías las imágenes después -->
 

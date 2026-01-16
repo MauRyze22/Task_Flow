@@ -47,8 +47,7 @@ def login_user(request):
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
-
-            if not hasattr(user, 'Perfil'):
+            if not hasattr(user, 'perfil'):
                 Perfil.objects.create(
                     user = user,
                     email = user.email if user.email else ""
