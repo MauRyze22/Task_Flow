@@ -1,51 +1,109 @@
 # TaskFlow
 
-"Gestión inteligente de tareas, proyectos y equipos — con roles, invitaciones seguras y colaboración real."
+**Gestión inteligente de tareas, proyectos y equipos**  
+con roles, permisos estrictos, invitaciones seguras y comentarios en tiempo real.
 
-<!-- Badge opcionales (muy recomendados) -->
-![GitHub top language](https://img.shields.io/github/languages/top/MauRyze22/Task_Flow)
-![GitHub stars](https://img.shields.io/github/stars/MauRyze22/Task_Flow?style=social)
-![GitHub last commit](https://img.shields.io/github/last-commit/MauRyze22/Task_Flow)
+[![GitHub top language](https://img.shields.io/github/languages/top/MauRyze22/Task_Flow)](https://github.com/MauRyze22/Task_Flow)
+[![GitHub stars](https://img.shields.io/github/stars/MauRyze22/Task_Flow?style=social)](https://github.com/MauRyze22/Task_Flow)
+[![GitHub last commit](https://img.shields.io/github/last-commit/MauRyze22/Task_Flow)](https://github.com/MauRyze22/Task_Flow)
 
-## 📖 Descripción
+## 📸 Vistas previas
 
-**TaskManager** es una aplicación web completa para la **gestión de tareas, proyectos y equipos** con un sistema robusto de **permisos y roles** que garantiza seguridad y orden.
+<p align="center">
+  <img src="screenshots/dashboard.png" alt="Dashboard principal" width="45%">
+  <img src="screenshots/teams.png" alt="Todos los proyectos en tiempo real" width="45%">
+</p>
+<p align="center">
+  <img src="screenshots/task-comments.png" alt="Comentarios en tiempo real" width="45%">
+  <img src="screenshots/profile-user.png" alt="Sistema de logueo de usuario" width="45%">
+</p>
 
-Crea proyectos, asigna tareas, añade comentarios en tiempo real e invita a colaboradores por email (solo los **jefes de equipo** pueden hacerlo). Cada usuario solo accede a lo que le corresponde: sus tareas personales, los proyectos donde participa o todo si es **administrador**.
+## 📖 Sobre el proyecto
 
-Ideal para equipos pequeños, startups o freelancers que quieren colaborar sin perder el control ni exponer información sensible.
+TaskFlow es una aplicación web completa para **gestionar tareas, proyectos y equipos** de forma segura.  
+Nace para resolver el problema típico de herramientas gratuitas: o son demasiado simples (y caóticas) o demasiado caras y complejas.
 
-Permite crear proyectos, asignar tareas, añadir comentarios y colaborar en tiempo real. Los **jefes de equipo** pueden invitar a nuevos miembros mediante enlaces por email, mientras que los **administradores** tienen acceso total. Cada usuario solo ve y modifica lo que le corresponde según su rol, garantizando seguridad y organización.
+Aquí cada usuario solo ve y edita **lo que le corresponde** según su rol.
 
-Ideal para equipos pequeños y medianos que buscan una solución sencilla pero potente para coordinar proyectos sin perder el control.
+## ✨ Características principales
 
-## 🚀 Demo / Vista previa
-Aquí va lo más importante para portafolio → que se vea el resultado
-
-- 🌐 **Demo en vivo**: [https://tu-proyecto.vercel.app](https://tu-proyecto.vercel.app)  
-- 📱 **Capturas de pantalla**: 
-
-![alt text](<Captura de pantalla_16-1-2026_1323_localhost.jpeg>) ![alt text](<Captura de pantalla_16-1-2026_13035_localhost.jpeg>) ![alt text](<Captura de pantalla_16-1-2026_13927_localhost.jpeg>) ![alt text](<Captura de pantalla_16-1-2026_13948_localhost (1).jpeg>)
-
-<!-- Aquí pondrías las imágenes después -->
+- ✅ Creación y gestión de proyectos y tareas
+- ✅ Sistema de roles y permisos granular (Administrador, Jefe de equipo, Miembro, Invitado)
+- ✅ Invitaciones seguras por email (solo jefes pueden invitar)
+- ✅ Comentarios en tiempo real en cada tarea
+- ✅ Panel personal con mis tareas pendientes
+- ✅ Edición de perfil de usuario: actualización de datos personales y foto de perfil
+- ✅ Autenticación segura con Django (login, registro, cambio de contraseña)
+- ✅ Soporte completo para PostgreSQL (fácil de deployar)
 
 ## 🛠️ Tecnologías utilizadas
-- HTML5 / CSS3 / JavaScript
-- Bootstrap
-- Python + Django
-- PostgresSQL
 
-## ⚙️ Instalación y ejecución (si aplica)
+- **Backend**: Python 3.10+ • Django
+- **Frontend**: HTML5 • CSS3 • JavaScript • Bootstrap
+- **Base de datos**: PostgreSQL (producción) + SQLite (pruebas rápidas)
+- **Autenticación**: Django contrib.auth (built-in)
+- **Otros**: python-dotenv (para variables de entorno)
+
+## 🚀 Instalación rápida (desarrollo)
+
+### Requisitos previos
+
+- Python 3.10+  
+- PostgreSQL (o usa SQLite para pruebas rápidas)  
+- Git
+
+### Pasos
 
 ```bash
-# Clonar el repositorio
+# 1. Clonar el repositorio
 git clone https://github.com/MauRyze22/Task_Flow.git
-
-# Entrar a la carpeta
 cd Task_Flow
 
-# Instalar dependencias
-npm install    # o yarn install / pip install -r requirements.txt
+# 2. Crear y activar entorno virtual
+python -m venv venv
+source venv/bin/activate    # Windows: venv\Scripts\activate
 
-# Iniciar el proyecto
-npm run dev    # o python manage.py runserver/ npm start
+# 3. Instalar dependencias
+pip install -r requirements.txt
+
+# 4. Configurar variables de entorno
+cp .env.example .env
+# Edita .env con tus datos (SECRET_KEY, DATABASE, etc.)
+
+# 5. Aplicar migraciones y crear superusuario
+python manage.py makemigrations
+python manage.py migrate
+python manage.py createsuperuser
+
+# 6. Correr el servidor
+python manage.py runserver
+
+```
+## 🤝 Contribuir
+
+Este es un proyecto personal de portafolio mientras aprendo Django.  
+Por ahora no acepto contribuciones externas, pero ¡cualquier sugerencia o feedback es súper bienvenido!  
+Abre un issue con ideas, bugs o mejoras que veas. Gracias por el interés 🚀
+
+## ✉️ Sobre mí / Contacto
+
+Hola, soy **Amaury Monteagudo** — desarrollador backend en formación, enfocado en Python, Django, APIs seguras y bases de datos.
+
+Este proyecto (TaskFlow) forma parte de mi portafolio personal para demostrar habilidades en:
+
+- Autenticación y autorización (RBAC con roles y permisos granulares)
+- Gestión de usuarios y equipos colaborativos
+- Invitaciones seguras y control de acceso
+- Buenas prácticas de Django (migraciones, entornos, PostgreSQL)
+
+Estoy aprendiendo y mejorando constantemente, así que cualquier feedback, sugerencia o issue es **muy bienvenido** — ¡me ayuda a crecer!
+
+📧 Email: amaurymonteagudop22@gmail.com  
+🔗 GitHub: [@MauRyze22](https://github.com/MauRyze22)  
+🔗 LinkedIn: [linkedin.com/in/amaury-monteagudo](https://www.linkedin.com/in/amaury-monteagudo)
+
+¡Gracias por tomarte el tiempo de ver mi proyecto! 🚀 Cualquier comentario suma muchísimo. 💙
+
+## 📄 Licencia
+
+[MIT License](LICENSE) — puedes usar, modificar y distribuir el código libremente (con el aviso de copyright).
