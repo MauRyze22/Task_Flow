@@ -1,48 +1,43 @@
-{% extends "main.html" %}
+{% extends 'main.html' %}
 {% load static %}
 
-{% block title %}{{ proyecto.name }}{% endblock %}
 {% block page_title %}{{ proyecto.name }}{% endblock %}
 
 {% block content %}
 <!-- Breadcrumb -->
 <div class="breadcrumb-nav">
-    <a href="{% url 'proyectos' %}" class="breadcrumb-link">
+    <a href="{% url 'proyectos' %}" class="breadcrumb-link" data-link>
         <i class="bi bi-arrow-left"></i>
         Volver a Proyectos
     </a>
 </div>
 
+<!-- Detail Container -->
 <div class="detail-container">
-    <!-- Columna principal -->
+    <!-- Main Content -->
     <div class="detail-main">
-        <!-- Header del proyecto -->
-        <div class="card detail-header-card project-header-card">
-            <div class="detail-header">
-                <div class="header-icon">
-                    <i class="bi bi-folder-fill"></i>
-                </div>
-                <div class="header-content">
-                    <h1>{{ proyecto.name }}</h1>
-                    <p>{{ proyecto.get_tipo_display }}</p>
-                </div>
-                <div class="header-badge">
-                    {% if request.user == proyecto.tutor %}
-                        <span class="badge-large badge-success">
-                            <i class="bi bi-star-fill"></i>
-                            Eres el Tutor
+        <!-- Header Card -->
+        <div class="card project-header-card">
+            <div class="card-body">
+                <div class="detail-header">
+                    <div class="header-icon">
+                        <i class="bi bi-folder2-open"></i>
+                    </div>
+                    <div class="header-content">
+                        <h1>{{ proyecto.name }}</h1>
+                        <p>Proyecto {{ proyecto.get_tipo_display|lower }}</p>
+                    </div>
+                    <div class="header-badge">
+                        <span class="badge-large">
+                            <i class="bi bi-circle-fill"></i>
+                            Activo
                         </span>
-                    {% else %}
-                        <span class="badge-large badge-primary">
-                            <i class="bi bi-person-check"></i>
-                            Participante
-                        </span>
-                    {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
-        
-        <!-- Información del proyecto -->
+
+        <!-- Info Grid -->
         <div class="card">
             <div class="card-header">
                 <div class="card-title">
@@ -53,104 +48,57 @@
             <div class="card-body">
                 <div class="info-grid-detail">
                     <div class="info-box">
-                        <div class="info-box-icon bg-success">
-                            <i class="bi bi-tag"></i>
-                        </div>
-                        <div class="info-box-content">
-                            <span class="info-box-label">Nombre</span>
-                            <span class="info-box-value">{{ proyecto.name }}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="info-box">
                         <div class="info-box-icon bg-primary">
                             <i class="bi bi-person-badge"></i>
                         </div>
                         <div class="info-box-content">
-                            <span class="info-box-label">Tutor</span>
-                            <a href="{% url 'profile_user' proyecto.tutor.id %}" class="info-box-value info-box-link">
+                            <span class="info-box-label">Tutor del Proyecto</span>
+                            <a href="{% url 'profile_user' proyecto.tutor.id %}" 
+                               class="info-box-value info-box-link"
+                               data-link>
                                 {{ proyecto.tutor.username }}
                             </a>
                         </div>
                     </div>
-                    
+
                     <div class="info-box">
-                        <div class="info-box-icon bg-info">
+                        <div class="info-box-icon bg-success">
                             <i class="bi bi-people"></i>
                         </div>
                         <div class="info-box-content">
-                            <span class="info-box-label">Equipo</span>
-                            <a href="{% url 'equipo_detail' proyecto.equipo.id %}" class="info-box-value info-box-link">
+                            <span class="info-box-label">Equipo Asignado</span>
+                            <a href="{% url 'equipo_detail' proyecto.equipo.id %}" 
+                               class="info-box-value info-box-link"
+                               data-link>
                                 Equipo {{ proyecto.equipo.numero }}
                             </a>
                         </div>
                     </div>
-                    
+
                     <div class="info-box">
-                        <div class="info-box-icon bg-warning">
-                            <i class="bi bi-bookmark"></i>
+                        <div class="info-box-icon bg-info">
+                            <i class="bi bi-tag"></i>
                         </div>
                         <div class="info-box-content">
-                            <span class="info-box-label">Tipo</span>
+                            <span class="info-box-label">Tipo de Proyecto</span>
                             <span class="info-box-value">{{ proyecto.get_tipo_display }}</span>
                         </div>
                     </div>
-                </div>
-                
-                <!-- Fechas -->
-                <div class="info-grid-detail">
+
                     <div class="info-box">
-                        <div class="info-box-icon bg-primary">
-                            <i class="bi bi-calendar-plus"></i>
+                        <div class="info-box-icon bg-warning">
+                            <i class="bi bi-calendar-event"></i>
                         </div>
                         <div class="info-box-content">
-                            <span class="info-box-label">Fecha de creación</span>
-                            <span class="info-box-value">{{ proyecto.created|date:"d M Y" }}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="info-box">
-                        <div class="info-box-icon bg-info">
-                            <i class="bi bi-clock-history"></i>
-                        </div>
-                        <div class="info-box-content">
-                            <span class="info-box-label">Última actualización</span>
-                            <span class="info-box-value">{{ proyecto.updated|timesince }} atrás</span>
+                            <span class="info-box-label">Creado</span>
+                            <span class="info-box-value">{{ proyecto.created|date:"d/m/Y" }}</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <!-- Acciones (solo para tutor) -->
-        {% if proyecto.tutor == request.user %}
-        <div class="card">
-            <div class="card-header">
-                <div class="card-title">
-                    <i class="bi bi-lightning-charge"></i>
-                    <h3>Acciones del Tutor</h3>
-                </div>
-            </div>
-            <div class="card-body">
-                <p class="action-description">Como tutor del proyecto, puedes gestionar su información y tareas.</p>
-                <div class="action-buttons-grid">
-                    <a href="{% url 'proyecto_update' proyecto.id %}" class="btn btn-success btn-full">
-                        <i class="bi bi-pencil-square"></i>
-                        <span>Editar Proyecto</span>
-                    </a>
-                    <button class="btn btn-danger btn-full" onclick="confirmDelete()">
-                        <i class="bi bi-trash"></i>
-                        <span>Eliminar Proyecto</span>
-                    </button>
-                </div>
-            </div>
-        </div>
-        {% endif %}
-    </div>
-    
-    <!-- Sidebar - Estadísticas y Acciones -->
-    <div class="detail-sidebar">
-        <!-- Estadísticas simplificadas -->
+
+        <!-- Stats Grid -->
         <div class="card">
             <div class="card-header">
                 <div class="card-title">
@@ -161,17 +109,37 @@
             <div class="card-body">
                 <div class="stats-list">
                     <div class="stat-item">
-                        <div class="stat-item-icon bg-primary">
-                            <i class="bi bi-list-check"></i>
+                        <div class="stat-item-icon bg-warning">
+                            <i class="bi bi-check2-square"></i>
                         </div>
                         <div class="stat-item-content">
                             <span class="stat-item-label">Tareas Totales</span>
                             <span class="stat-item-value">{{ proyecto.tareas.count }}</span>
                         </div>
                     </div>
-                    
+
+                    <div class="stat-item">
+                        <div class="stat-item-icon bg-success">
+                            <i class="bi bi-check-circle-fill"></i>
+                        </div>
+                        <div class="stat-item-content">
+                            <span class="stat-item-label">Tareas Completadas</span>
+                            <span class="stat-item-value">{{ proyecto.tareas.filter.count|default:0 }}</span>
+                        </div>
+                    </div>
+
                     <div class="stat-item">
                         <div class="stat-item-icon bg-info">
+                            <i class="bi bi-hourglass-split"></i>
+                        </div>
+                        <div class="stat-item-content">
+                            <span class="stat-item-label">Tareas en Progreso</span>
+                            <span class="stat-item-value">{{ proyecto.tareas.filter.count|default:0 }}</span>
+                        </div>
+                    </div>
+
+                    <div class="stat-item">
+                        <div class="stat-item-icon bg-primary">
                             <i class="bi bi-people"></i>
                         </div>
                         <div class="stat-item-content">
@@ -182,8 +150,38 @@
                 </div>
             </div>
         </div>
-        
-        <!-- Acciones rápidas -->
+    </div>
+
+    <!-- Sidebar -->
+    <div class="detail-sidebar">
+        <!-- Team Info -->
+        <div class="card">
+            <div class="card-header">
+                <div class="card-title">
+                    <i class="bi bi-people"></i>
+                    <h3>Equipo</h3>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="team-mini-info">
+                    <div class="team-mini-header">
+                        <div class="team-mini-icon">
+                            <i class="bi bi-people-fill"></i>
+                        </div>
+                        <div>
+                            <a href="{% url 'equipo_detail' proyecto.equipo.id %}" 
+                               class="team-mini-name"
+                               data-link>
+                                Equipo {{ proyecto.equipo.numero }}
+                            </a>
+                            <span class="team-mini-members">{{ proyecto.equipo.integrantes.count }} miembros</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
         <div class="card">
             <div class="card-header">
                 <div class="card-title">
@@ -193,81 +191,35 @@
             </div>
             <div class="card-body">
                 <div class="quick-actions">
-                    <a href="{% url 'create_tarea' %}" class="quick-action-btn">
+                    <a href="{% url 'create_tarea' %}" 
+                       class="quick-action-btn"
+                       data-link>
                         <i class="bi bi-plus-circle"></i>
-                        <span>Crear Nueva Tarea</span>
+                        <span>Nueva Tarea</span>
                     </a>
-                    <a href="{% url 'tareas' %}" class="quick-action-btn">
+                    <a href="{% url 'tareas' %}" 
+                       class="quick-action-btn"
+                       data-link>
                         <i class="bi bi-list-check"></i>
                         <span>Ver Todas las Tareas</span>
                     </a>
-                    <a href="{% url 'equipo_detail' proyecto.equipo.id %}" class="quick-action-btn">
-                        <i class="bi bi-people"></i>
-                        <span>Ver Equipo</span>
+                    {% if user == proyecto.tutor %}
+                    <a href="{% url 'proyecto_update' proyecto.id %}" 
+                       class="quick-action-btn"
+                       data-link>
+                        <i class="bi bi-pencil"></i>
+                        <span>Editar Proyecto</span>
                     </a>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Info del equipo -->
-        <div class="card stats-mini-card">
-            <h4>Equipo Asignado</h4>
-            <div class="team-mini-info">
-                <div class="team-mini-header">
-                    <div class="team-mini-icon">
-                        <i class="bi bi-people-fill"></i>
-                    </div>
-                    <div>
-                        <a href="{% url 'equipo_detail' proyecto.equipo.id %}" class="team-mini-name">
-                            Equipo {{ proyecto.equipo.numero }}
-                        </a>
-                        <span class="team-mini-members">{{ proyecto.equipo.integrantes.count }} integrantes</span>
-                    </div>
+                    <a href="{% url 'proyecto_delete' proyecto.id %}" 
+                       class="quick-action-btn"
+                       data-link>
+                        <i class="bi bi-trash"></i>
+                        <span>Eliminar Proyecto</span>
+                    </a>
+                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<!-- Modal de confirmación -->
-<div class="modal-overlay" id="deleteModal">
-    <div class="modal-content">
-        <div class="modal-header-danger">
-            <i class="bi bi-exclamation-triangle"></i>
-            <h3>¿Eliminar proyecto?</h3>
-        </div>
-        <div class="modal-body">
-            <p>Esta acción no se puede deshacer. Se eliminarán todas las tareas y datos relacionados con este proyecto.</p>
-        </div>
-        <div class="modal-actions">
-            <button class="btn btn-secondary" onclick="closeDeleteModal()">
-                Cancelar
-            </button>
-            <a href="{% url 'proyecto_delete' proyecto.id %}" class="btn btn-danger">
-                Sí, eliminar
-            </a>
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-function confirmDelete() {
-    document.getElementById('deleteModal').classList.add('show');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeDeleteModal() {
-    document.getElementById('deleteModal').classList.remove('show');
-    document.body.style.overflow = '';
-}
-
-// Cerrar modal al hacer clic fuera
-document.getElementById('deleteModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeDeleteModal();
-    }
-});
-</script>
 {% endblock %}

@@ -1,117 +1,99 @@
 {% extends 'main.html' %}
 {% load static %}
 
-{% block title %}Invitación a Equipo{% endblock %}
-{% block page_title %}Invitación a Equipo{% endblock %}
+{% block page_title %}Invitación al Equipo{% endblock %}
 
 {% block content %}
 <div class="invitation-page-container">
     <div class="invitation-card">
-        <!-- Ícono de invitación -->
         <div class="invitation-icon">
             <i class="bi bi-envelope-heart"></i>
         </div>
-        
-        <!-- Título -->
-        <h2 class="invitation-title">¡Has sido invitado!</h2>
-        <p class="invitation-subtitle">Tienes una nueva invitación para unirte a un equipo</p>
-        
-        <!-- Información del equipo -->
+
+        <h1 class="invitation-title">¡Has sido invitado!</h1>
+        <p class="invitation-subtitle">Un equipo quiere que te unas a ellos</p>
+
+        <!-- Invitation Info -->
         <div class="invitation-info">
             <div class="invitation-avatar">
-                {{ equipo.jefe.username|slice:":1"|upper }}
+                {{ invitacion.equipo.jefe.username|slice:":1"|upper }}
             </div>
             <div class="invitation-details">
                 <div class="invitation-from">
-                    <span class="from-label">Invitación de</span>
-                    <a href="{% url 'profile_user' equipo.jefe.id %}" class="from-name">
-                        {{ equipo.jefe.username }}
+                    <span class="from-label">Invitado por</span>
+                    <a href="{% url 'profile_user' invitacion.equipo.jefe.id %}" 
+                       class="from-name"
+                       data-link>
+                        {{ invitacion.equipo.jefe.username }}
                     </a>
                 </div>
                 <div class="invitation-team">
                     <i class="bi bi-people-fill"></i>
-                    <span>Equipo {{ equipo.numero }}</span>
+                    <span>Equipo {{ invitacion.equipo.numero }}</span>
                 </div>
             </div>
         </div>
-        
-        <!-- Detalles del equipo -->
+
+        <!-- Team Details -->
         <div class="team-details">
-            <div class="team-detail-item">
-                <i class="bi bi-person-badge"></i>
-                <div>
-                    <span class="detail-label">Jefe del equipo</span>
-                    <span class="detail-value">{{ equipo.jefe.username }}</span>
-                </div>
-            </div>
-            
             <div class="team-detail-item">
                 <i class="bi bi-people"></i>
                 <div>
-                    <span class="detail-label">Miembros actuales</span>
-                    <span class="detail-value">{{ equipo.integrantes.count }} integrante{{ equipo.integrantes.count|pluralize:"s" }}</span>
+                    <span class="detail-label">Miembros del Equipo</span>
+                    <span class="detail-value">{{ equipo.integrantes.count }} persona{{ equipo.integrantes.count|pluralize:"s" }}</span>
                 </div>
             </div>
-            
+
             <div class="team-detail-item">
-                <i class="bi bi-calendar-check"></i>
+                <i class="bi bi-person-badge"></i>
                 <div>
-                    <span class="detail-label">Equipo creado</span>
-                    <span class="detail-value">{{ equipo.created|date:"d M Y" }}</span>
+                    <span class="detail-label">Jefe del Equipo</span>
+                    <span class="detail-value">{{ invitacion.equipo.jefe.username }}</span>
+                </div>
+            </div>
+
+            <div class="team-detail-item">
+                <i class="bi bi-calendar-event"></i>
+                <div>
+                    <span class="detail-label">Invitación enviada</span>
+                    <span class="detail-value">{{ invitacion.created|timesince }} atrás</span>
                 </div>
             </div>
         </div>
-        
-        <!-- Banner informativo -->
+
+        <!-- Invitation Banner -->
         <div class="invitation-banner">
-            <i class="bi bi-info-circle"></i>
+            <i class="bi bi-info-circle-fill"></i>
             <div>
                 <strong>¿Qué sucede al aceptar?</strong>
-                <p>Serás añadido automáticamente como integrante del equipo y podrás colaborar en sus proyectos y tareas.</p>
+                <p>Serás agregado como miembro del equipo y podrás participar en todos sus proyectos y tareas.</p>
             </div>
         </div>
-        
-        <!-- Formulario -->
-        <form method="POST" class="invitation-form" id="invitationForm">
+
+        <!-- Invitation Actions -->
+        <form method="POST" id="invitationForm">
             {% csrf_token %}
-            
             <div class="invitation-actions">
-                <a href="{% url 'home' %}" class="btn btn-secondary btn-large">
+                <a href="{% url 'home' %}" 
+                   class="btn btn-secondary btn-large"
+                   data-link>
                     <i class="bi bi-x-circle"></i>
                     <span>Rechazar</span>
                 </a>
-                <button type="submit" class="btn btn-primary btn-large" id="acceptBtn">
+                <button type="submit" class="btn btn-primary btn-large">
                     <i class="bi bi-check-circle"></i>
                     <span>Aceptar Invitación</span>
                 </button>
             </div>
         </form>
-        
-        <!-- Footer -->
+
+        <!-- Invitation Footer -->
         <div class="invitation-footer">
             <i class="bi bi-shield-check"></i>
-            <span>Puedes abandonar el equipo en cualquier momento desde tu perfil</span>
+            <span>Puedes salir del equipo en cualquier momento</span>
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('invitationForm');
-    const acceptBtn = document.getElementById('acceptBtn');
-    
-    form.addEventListener('submit', function(e) {
-        const btnText = acceptBtn.querySelector('span');
-        const btnIcon = acceptBtn.querySelector('i');
-        
-        acceptBtn.disabled = true;
-        btnIcon.className = 'bi bi-arrow-clockwise rotating';
-        btnText.textContent = 'Uniéndote al equipo...';
-    });
-});
-</script>
 {% endblock %}
 
     

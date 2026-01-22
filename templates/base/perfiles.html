@@ -1,26 +1,26 @@
-{% extends "main.html" %}
+{% extends 'main.html' %}
 {% load static %}
 
-{% block title %}Miembros{% endblock %}
-{% block page_title %}Directorio de Miembros{% endblock %}
+{% block page_title %}Usuarios{% endblock %}
 
 {% block content %}
-<!-- Header -->
+<!-- Page Header -->
 <div class="page-header">
     <div class="page-header-content">
         <div class="page-header-text">
-            <h2>Miembros de TaskFlow</h2>
-            <p>Todos los usuarios registrados en la plataforma</p>
+            <h2>Directorio de Usuarios</h2>
+            <p>Encuentra y conecta con otros miembros de TaskFlow</p>
         </div>
     </div>
 </div>
 
-<!-- Grid de perfiles -->
+<!-- Members Grid -->
+{% if perfiles %}
 <div class="members-grid">
     {% for perfil in perfiles %}
     <div class="member-card">
         <div class="member-card-avatar">
-            {% if perfil.imagen and perfil.imagen.name %}
+            {% if perfil.imagen %}
                 <img src="{{ perfil.imagen.url }}" alt="{{ perfil.user.username }}">
             {% else %}
                 <div class="member-avatar-placeholder">
@@ -28,11 +28,11 @@
                 </div>
             {% endif %}
         </div>
-        
+
         <div class="member-card-info">
             <h3>{{ perfil.user.username }}</h3>
             <span class="member-role">{{ perfil.rol|default:"Usuario" }}</span>
-            
+
             <div class="member-meta">
                 {% if perfil.email %}
                 <div class="member-meta-item">
@@ -40,29 +40,38 @@
                     <span>{{ perfil.email|truncatechars:25 }}</span>
                 </div>
                 {% endif %}
-                
                 {% if perfil.pais and perfil.pais != "No registrado" %}
                 <div class="member-meta-item">
-                    <i class="bi bi-geo-alt"></i>
+                    <i class="bi bi-globe"></i>
                     <span>{{ perfil.pais }}</span>
                 </div>
                 {% endif %}
             </div>
+
+            <a href="{% url 'profile_user' perfil.user.id %}" 
+               class="member-card-link"
+               data-link>
+                <i class="bi bi-person"></i>
+                <span>Ver Perfil</span>
+            </a>
         </div>
-        
-        <a href="{% url 'profile_user' perfil.user.id %}" class="member-card-link">
-            <span>Ver Perfil</span>
-            <i class="bi bi-arrow-right"></i>
-        </a>
-    </div>
-    {% empty %}
-    <div class="empty-state-large" style="grid-column: 1/-1;">
-        <div class="empty-icon">
-            <i class="bi bi-people"></i>
-        </div>
-        <h3>No hay miembros registrados</h3>
-        <p>Aún no hay usuarios en la plataforma.</p>
     </div>
     {% endfor %}
 </div>
+
+<!-- Pagination Info -->
+<div class="pagination-info">
+    <p>Mostrando {{ perfiles|length }} usuario{{ perfiles|length|pluralize:"s" }}</p>
+</div>
+
+{% else %}
+<!-- Empty State -->
+<div class="empty-state-large">
+    <div class="empty-icon">
+        <i class="bi bi-people"></i>
+    </div>
+    <h3>No hay usuarios registrados</h3>
+    <p>Cuando otros usuarios se registren, aparecerán aquí.</p>
+</div>
+{% endif %}
 {% endblock %}

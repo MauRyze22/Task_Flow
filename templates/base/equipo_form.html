@@ -1,52 +1,62 @@
-{% extends "main.html" %}
+{% extends 'main.html' %}
 {% load static %}
 
-{% block title %}{% if page == 'update' %}Editar Equipo{% else %}Crear Equipo{% endif %}{% endblock %}
-{% block page_title %}{% if page == 'update' %}Editar Equipo{% else %}Nuevo Equipo{% endif %}{% endblock %}
+{% block page_title %}
+    {% if page == 'update' %}Editar Equipo{% else %}Crear Equipo{% endif %}
+{% endblock %}
 
 {% block content %}
 <div class="form-page-container">
     <div class="form-card">
-        <!-- Header del formulario -->
+        <!-- Form Header -->
         <div class="form-header">
             <div class="form-icon">
                 <i class="bi bi-people-fill"></i>
             </div>
             <div class="form-header-text">
-                <h2>{% if page == 'update' %}Modificar Equipo{% else %}Crear Nuevo Equipo{% endif %}</h2>
-                <p>{% if page == 'update' %}Actualiza la información del equipo{% else %}Completa los datos para crear un nuevo equipo{% endif %}</p>
+                <h2>{% if page == 'update' %}Editar Equipo{% else %}Crear Nuevo Equipo{% endif %}</h2>
+                <p>{% if page == 'update' %}Actualiza la información del equipo{% else %}Completa los datos para crear un equipo{% endif %}</p>
             </div>
         </div>
-        
-        <!-- Formulario -->
-        <form method="POST" class="profile-form" id="equipoForm">
+
+        <!-- Form Messages -->
+        {% if messages %}
+        <div class="auth-messages">
+            {% for message in messages %}
+            <div class="message message-{{ message.tags }}">
+                <i class="bi 
+                    {% if message.tags == 'success' %}bi-check-circle-fill
+                    {% elif message.tags == 'error' %}bi-exclamation-circle-fill
+                    {% else %}bi-info-circle-fill{% endif %}">
+                </i>
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Form -->
+        <form method="POST" id="equipoForm">
             {% csrf_token %}
             
             <div class="form-grid">
                 {% for field in form %}
-                <div class="form-field {% if field.field.widget.input_type == 'select' and field.field.widget.attrs.multiple %}form-field-full{% endif %} {% if field.field.required %}required{% endif %}">
+                <div class="form-field {% if field.name == 'integrantes' or field.name == 'descripcion' %}col-span-2{% endif %}">
                     <label for="{{ field.id_for_label }}" class="field-label">
                         {{ field.label }}
-                        {% if field.field.required %}<span class="required-mark">*</span>{% endif %}
+                        {% if field.field.required %}
+                        <span class="required-mark">*</span>
+                        {% endif %}
                     </label>
                     
                     <div class="field-wrapper {% if field.errors %}has-error{% endif %}">
-                        {% if 'numero' in field.name %}
-                            <i class="field-icon bi bi-hash"></i>
-                        {% elif 'jefe' in field.name %}
-                            <i class="field-icon bi bi-person-badge"></i>
-                        {% elif 'integrantes' in field.name %}
-                            <i class="field-icon bi bi-people"></i>
-                        {% elif 'nombre' in field.name %}
-                            <i class="field-icon bi bi-tag"></i>
-                        {% elif 'descripcion' in field.name %}
-                            <i class="field-icon bi bi-text-left"></i>
-                        {% else %}
-                            <i class="field-icon bi bi-pencil"></i>
-                        {% endif %}
-                        
+                        <i class="field-icon bi 
+                            {% if field.name == 'numero' %}bi-hash
+                            {% elif field.name == 'jefe' %}bi-person-badge
+                            {% elif field.name == 'integrantes' %}bi-people
+                            {% else %}bi-pencil{% endif %}">
+                        </i>
                         {{ field }}
-                        
                         {% if field.errors %}
                         <i class="field-status bi bi-exclamation-circle"></i>
                         {% endif %}
@@ -57,187 +67,52 @@
                     {% endif %}
                     
                     {% if field.errors %}
+                    {% for error in field.errors %}
                     <div class="field-error">
-                        <i class="bi bi-x-circle"></i>
-                        {% for error in field.errors %}
-                            {{ error }}
-                        {% endfor %}
+                        <i class="bi bi-exclamation-circle"></i>
+                        <span>{{ error }}</span>
                     </div>
+                    {% endfor %}
                     {% endif %}
                 </div>
                 {% endfor %}
             </div>
-            
-            <!-- Información importante -->
-            <div class="form-info-banner">
-                <i class="bi bi-lightbulb"></i>
-                <div>
-                    <strong>Información importante:</strong>
-                    <p>El jefe del equipo será automáticamente agregado como integrante si no está en la lista de miembros seleccionados.</p>
-                </div>
-            </div>
-            
-            <!-- Botones de acción -->
+
+            <!-- Form Actions -->
             <div class="form-actions">
-                <a href="{% if page == 'update' %}{% url 'equipo_detail' equipo.id %}{% else %}{% url 'equipos' %}{% endif %}" class="btn btn-secondary">
-                    <i class="bi bi-arrow-left"></i>
+                <a href="{% url 'equipos' %}" class="btn btn-secondary" data-link>
+                    <i class="bi bi-x-circle"></i>
                     <span>Cancelar</span>
                 </a>
-                <button type="submit" class="btn btn-primary" id="submitBtn">
-                    <i class="bi bi-{% if page == 'update' %}check-circle{% else %}plus-circle{% endif %}"></i>
-                    <span>{% if page == 'update' %}Actualizar Equipo{% else %}Crear Equipo{% endif %}</span>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi {% if page == 'update' %}bi-check-circle{% else %}bi-plus-circle{% endif %}"></i>
+                    <span>{% if page == 'update' %}Guardar Cambios{% else %}Crear Equipo{% endif %}</span>
                 </button>
             </div>
         </form>
+
+        <!-- Form Info -->
+        <div class="form-info">
+            <i class="bi bi-info-circle"></i>
+            <p>
+                {% if page == 'update' %}
+                    Los cambios se guardarán inmediatamente y afectarán a todos los miembros del equipo.
+                {% else %}
+                    Al crear un equipo, serás agregado automáticamente como miembro junto con el jefe seleccionado.
+                {% endif %}
+            </p>
+        </div>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-// Validación y efectos visuales
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('equipoForm');
-    const inputs = form.querySelectorAll('input, select, textarea');
-    
-    // Animación al hacer focus
-    inputs.forEach(input => {
-        input.addEventListener('focus', function() {
-            this.closest('.field-wrapper').classList.add('focused');
-        });
-        
-        input.addEventListener('blur', function() {
-            this.closest('.field-wrapper').classList.remove('focused');
-            
-            // Validar campo
-            if (this.value.trim() !== '' || this.selectedOptions?.length > 0) {
-                this.closest('.field-wrapper').classList.add('has-value');
-            } else {
-                this.closest('.field-wrapper').classList.remove('has-value');
-            }
-        });
-        
-        // Marcar campos con valor inicial
-        if (input.value.trim() !== '' || input.selectedOptions?.length > 0) {
-            input.closest('.field-wrapper').classList.add('has-value');
-        }
-    });
-    
-    // Mejorar select múltiple
-    const multiSelects = form.querySelectorAll('select[multiple]');
-    multiSelects.forEach(select => {
-        select.addEventListener('change', function() {
-            const count = this.selectedOptions.length;
-            const wrapper = this.closest('.field-wrapper');
-            
-            if (count > 0) {
-                wrapper.classList.add('has-value');
-                
-                // Crear badge de conteo si no existe
-                let badge = wrapper.querySelector('.select-count-badge');
-                if (!badge) {
-                    badge = document.createElement('div');
-                    badge.className = 'select-count-badge';
-                    wrapper.appendChild(badge);
-                }
-                badge.textContent = `${count} seleccionado${count > 1 ? 's' : ''}`;
-            } else {
-                wrapper.classList.remove('has-value');
-                const badge = wrapper.querySelector('.select-count-badge');
-                if (badge) badge.remove();
-            }
-        });
-        
-        // Inicializar conteo
-        if (select.selectedOptions.length > 0) {
-            select.dispatchEvent(new Event('change'));
-        }
-    });
-    
-    // Animación al enviar
-    form.addEventListener('submit', function(e) {
-        const submitBtn = document.getElementById('submitBtn');
-        const btnText = submitBtn.querySelector('span');
-        const btnIcon = submitBtn.querySelector('i');
-        
-        submitBtn.disabled = true;
-        btnIcon.className = 'bi bi-arrow-clockwise rotating';
-        btnText.textContent = 'Guardando...';
-    });
-});
-</script>
 
 <style>
-/* Estilos adicionales para este formulario */
-.form-field-full {
-    grid-column: 1 / -1;
-}
-
-select[multiple] {
-    min-height: 150px;
-    padding: 8px;
-}
-
-select[multiple] option {
-    padding: 8px 12px;
-    border-radius: 4px;
-    margin-bottom: 4px;
-}
-
-select[multiple] option:checked {
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
-    color: white;
-}
-
-.select-count-badge {
-    position: absolute;
-    bottom: 12px;
-    right: 12px;
-    padding: 4px 10px;
-    background: var(--primary);
-    color: white;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: 600;
-    pointer-events: none;
-    z-index: 2;
-}
-
-.form-info-banner {
-    display: flex;
-    align-items: flex-start;
-    gap: 16px;
-    padding: 20px;
-    background: #FFFBEB;
-    border-radius: var(--border-radius);
-    border-left: 4px solid #F59E0B;
-    margin-bottom: 24px;
-}
-
-.form-info-banner i {
-    font-size: 24px;
-    color: #F59E0B;
-    flex-shrink: 0;
-    margin-top: 2px;
-}
-
-.form-info-banner strong {
-    display: block;
-    font-size: 14px;
-    color: var(--gray-900);
-    margin-bottom: 4px;
-}
-
-.form-info-banner p {
-    font-size: 13px;
-    color: var(--gray-700);
-    line-height: 1.5;
-    margin: 0;
+.col-span-2 {
+    grid-column: span 2;
 }
 
 @media (max-width: 768px) {
-    .form-field-full {
-        grid-column: 1;
+    .col-span-2 {
+        grid-column: span 1;
     }
 }
 </style>

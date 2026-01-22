@@ -1,208 +1,212 @@
 {% extends 'main.html' %}
 {% load static %}
 
-{% block title %}Perfil de {{ user.username }}{% endblock %}
 {% block page_title %}Perfil de {{ user.username }}{% endblock %}
 
 {% block content %}
+<!-- Profile Container -->
 <div class="profile-container">
-    <!-- Sidebar del perfil -->
+    <!-- Sidebar -->
     <div class="profile-sidebar">
-        <!-- Card principal del usuario -->
+        <!-- Profile Card -->
         <div class="card profile-card">
-            <div class="profile-avatar-large">
+            <div class="card-body">
                 {% if perfil.imagen %}
+                <div class="profile-avatar-large">
                     <img src="{{ perfil.imagen.url }}" alt="{{ user.username }}">
+                </div>
                 {% else %}
-                    <div class="avatar-placeholder-large">
-                        {{ user.username|slice:":1"|upper }}
-                    </div>
+                <div class="avatar-placeholder-large">
+                    {{ user.username|slice:":1"|upper }}
+                </div>
                 {% endif %}
-            </div>
-            
-            <div class="profile-name">
-                <h2>{{ user.username }}</h2>
-                <span class="profile-role">{{ perfil.rol|default:"Usuario" }}</span>
-            </div>
-            
-            <div class="profile-meta">
-                <div class="meta-item">
-                    <i class="bi bi-calendar-plus"></i>
-                    <div>
-                        <span class="meta-label">Miembro desde</span>
-                        <span class="meta-value">{{ user.date_joined|date:"d M Y" }}</span>
+
+                <div class="profile-name">
+                    <h2>{{ user.username }}</h2>
+                    <span class="profile-role">{{ perfil.rol|default:"Usuario" }}</span>
+                </div>
+
+                <div class="profile-meta">
+                    <div class="meta-item">
+                        <i class="bi bi-envelope"></i>
+                        <div>
+                            <span class="meta-label">Email</span>
+                            <span class="meta-value">{{ perfil.email|default:"No registrado" }}</span>
+                        </div>
+                    </div>
+
+                    <div class="meta-item">
+                        <i class="bi bi-telephone"></i>
+                        <div>
+                            <span class="meta-label">Teléfono</span>
+                            <span class="meta-value">{{ perfil.numero|default:"No registrado" }}</span>
+                        </div>
+                    </div>
+
+                    <div class="meta-item">
+                        <i class="bi bi-globe"></i>
+                        <div>
+                            <span class="meta-label">País</span>
+                            <span class="meta-value">{{ perfil.pais|default:"No registrado" }}</span>
+                        </div>
                     </div>
                 </div>
-                <div class="meta-item">
-                    <i class="bi bi-clock-history"></i>
-                    <div>
-                        <span class="meta-label">Último acceso</span>
-                        <span class="meta-value">{{ user.last_login|date:"d M Y" }}</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="profile-actions">
+
                 {% if request.user == user %}
-                    <a href="{% url 'actualizar_profile' perfil.id %}" class="btn btn-primary btn-full">
-                        <i class="bi bi-pencil-square"></i>
+                <div class="profile-actions">
+                    <a href="{% url 'actualizar_profile' perfil.id %}" 
+                       class="btn btn-primary"
+                       data-link>
+                        <i class="bi bi-pencil"></i>
                         <span>Editar Perfil</span>
                     </a>
+                </div>
                 {% else %}
-                    <a href="{% url 'enviar_invitacion' user.id %}" class="btn btn-primary btn-full">
+                <div class="profile-actions">
+                    <a href="{% url 'enviar_invitacion' user.id %}" 
+                       class="btn btn-primary"
+                       data-link>
                         <i class="bi bi-person-plus"></i>
                         <span>Invitar a Equipo</span>
                     </a>
+                </div>
                 {% endif %}
             </div>
         </div>
-        
-        <!-- Estadísticas rápidas -->
+
+        <!-- Stats Card -->
         <div class="card stats-card">
-            <h3>Estadísticas</h3>
-            <div class="quick-stats">
-                <div class="quick-stat">
-                    <div class="stat-icon bg-primary">
-                        <i class="bi bi-people"></i>
+            <div class="card-body">
+                <h3>Estadísticas</h3>
+                <div class="quick-stats">
+                    <div class="quick-stat">
+                        <div class="stat-icon bg-primary">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number">{{ equipos_count }}</span>
+                            <span class="stat-label">Equipos</span>
+                        </div>
                     </div>
-                    <div class="stat-info">
-                        <span class="stat-number">{{ equipos_count }}</span>
-                        <span class="stat-label">Equipos</span>
-                    </div>
-                </div>
-                <div class="quick-stat">
-                    <div class="stat-icon bg-success">
-                        <i class="bi bi-check-circle"></i>
-                    </div>
-                    <div class="stat-info">
-                        <span class="stat-number">{{ tareas_realizadas }}</span>
-                        <span class="stat-label">Tareas completadas</span>
+
+                    <div class="quick-stat">
+                        <div class="stat-icon bg-success">
+                            <i class="bi bi-check-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <span class="stat-number">{{ tareas_realizadas }}</span>
+                            <span class="stat-label">Tareas Completadas</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- Contenido principal del perfil -->
+
+    <!-- Main Content -->
     <div class="profile-main">
-        <!-- Información personal -->
+        <!-- Info Card -->
         <div class="card">
             <div class="card-header">
                 <div class="card-title">
                     <i class="bi bi-info-circle"></i>
-                    <h3>Información Personal</h3>
+                    <h3>Información del Usuario</h3>
                 </div>
             </div>
             <div class="card-body">
                 <div class="info-grid">
                     <div class="info-item">
                         <div class="info-icon">
+                            <i class="bi bi-person"></i>
+                        </div>
+                        <div class="info-content">
+                            <span class="info-label">Nombre de Usuario</span>
+                            <span class="info-value">{{ user.username }}</span>
+                        </div>
+                    </div>
+
+                    <div class="info-item">
+                        <div class="info-icon">
                             <i class="bi bi-envelope"></i>
                         </div>
                         <div class="info-content">
-                            <span class="info-label">Email</span>
-                            <span class="info-value">{{ perfil.email|default:"No especificado" }}</span>
+                            <span class="info-label">Correo Electrónico</span>
+                            <span class="info-value">{{ perfil.email|default:"No registrado" }}</span>
                         </div>
                     </div>
-                    
+
                     <div class="info-item">
                         <div class="info-icon">
-                            <i class="bi bi-phone"></i>
+                            <i class="bi bi-telephone"></i>
                         </div>
                         <div class="info-content">
-                            <span class="info-label">Teléfono</span>
-                            <span class="info-value">{{ perfil.numero|default:"No especificado" }}</span>
+                            <span class="info-label">Número de Teléfono</span>
+                            <span class="info-value">{{ perfil.numero|default:"No registrado" }}</span>
                         </div>
                     </div>
-                    
+
                     <div class="info-item">
                         <div class="info-icon">
                             <i class="bi bi-globe"></i>
                         </div>
                         <div class="info-content">
                             <span class="info-label">País</span>
-                            <span class="info-value">{{ perfil.pais|default:"No especificado" }}</span>
+                            <span class="info-value">{{ perfil.pais|default:"No registrado" }}</span>
                         </div>
                     </div>
-                    
+
                     <div class="info-item">
                         <div class="info-icon">
-                            <i class="bi bi-person-badge"></i>
+                            <i class="bi bi-briefcase"></i>
                         </div>
                         <div class="info-content">
-                            <span class="info-label">Rol Principal</span>
+                            <span class="info-label">Rol</span>
                             <span class="info-value">{{ perfil.rol|default:"Usuario" }}</span>
                         </div>
                     </div>
+
+                    <div class="info-item">
+                        <div class="info-icon">
+                            <i class="bi bi-calendar-event"></i>
+                        </div>
+                        <div class="info-content">
+                            <span class="info-label">Miembro desde</span>
+                            <span class="info-value">{{ user.date_joined|date:"d/m/Y" }}</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
-        
-        <!-- Estadísticas detalladas -->
-        <div class="stats-grid">
-            <div class="card stat-detail-card">
-                <div class="stat-detail-icon bg-primary">
-                    <i class="bi bi-people"></i>
-                </div>
-                <div class="stat-detail-content">
-                    <span class="stat-detail-number">{{ equipos_count }}</span>
-                    <span class="stat-detail-label">Equipos</span>
-                    <p class="stat-detail-description">Equipos en los que participas como integrante o jefe</p>
-                </div>
-            </div>
-            
-            <div class="card stat-detail-card">
-                <div class="stat-detail-icon bg-success">
-                    <i class="bi bi-check-circle"></i>
-                </div>
-                <div class="stat-detail-content">
-                    <span class="stat-detail-number">{{ tareas_realizadas }}</span>
-                    <span class="stat-detail-label">Tareas Completadas</span>
-                    <p class="stat-detail-description">Tareas marcadas como realizadas en todos tus proyectos</p>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Actividad reciente -->
+
+        <!-- Stats Detail -->
         <div class="card">
             <div class="card-header">
                 <div class="card-title">
-                    <i class="bi bi-activity"></i>
-                    <h3>Actividad Reciente</h3>
+                    <i class="bi bi-bar-chart"></i>
+                    <h3>Actividad</h3>
                 </div>
             </div>
             <div class="card-body">
-                <div class="activity-timeline">
-                    <div class="timeline-item">
-                        <div class="timeline-marker bg-success"></div>
-                        <div class="timeline-content">
-                            <div class="timeline-header">
-                                <span class="timeline-title">Sesión iniciada</span>
-                                <span class="timeline-time">Hoy</span>
-                            </div>
-                            <p class="timeline-description">Has iniciado sesión en TaskFlow</p>
+                <div class="stats-grid">
+                    <div class="stat-detail-card">
+                        <div class="stat-detail-icon bg-primary">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <div class="stat-detail-content">
+                            <span class="stat-detail-number">{{ equipos_count }}</span>
+                            <span class="stat-detail-label">Equipos</span>
+                            <p class="stat-detail-description">Equipos en los que participa</p>
                         </div>
                     </div>
-                    
-                    <div class="timeline-item">
-                        <div class="timeline-marker bg-primary"></div>
-                        <div class="timeline-content">
-                            <div class="timeline-header">
-                                <span class="timeline-title">Tareas completadas</span>
-                                <span class="timeline-time">Esta semana</span>
-                            </div>
-                            <p class="timeline-description">Completaste {{ tareas_realizadas }} tarea{{ tareas_realizadas|pluralize:"s" }} en total</p>
+
+                    <div class="stat-detail-card">
+                        <div class="stat-detail-icon bg-success">
+                            <i class="bi bi-check-circle-fill"></i>
                         </div>
-                    </div>
-                    
-                    <div class="timeline-item">
-                        <div class="timeline-marker bg-info"></div>
-                        <div class="timeline-content">
-                            <div class="timeline-header">
-                                <span class="timeline-title">Participación en equipos</span>
-                                <span class="timeline-time">General</span>
-                            </div>
-                            <p class="timeline-description">Participas en {{ equipos_count }} equipo{{ equipos_count|pluralize:"s" }} de trabajo</p>
+                        <div class="stat-detail-content">
+                            <span class="stat-detail-number">{{ tareas_realizadas }}</span>
+                            <span class="stat-detail-label">Tareas Completadas</span>
+                            <p class="stat-detail-description">Tareas finalizadas exitosamente</p>
                         </div>
                     </div>
                 </div>

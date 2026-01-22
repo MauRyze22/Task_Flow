@@ -1,220 +1,28 @@
 {% extends 'main.html' %}
 {% load static %}
 
-{% block title %}Dashboard{% endblock %}
-{% block page_title %}Dashboard{% endblock %}
+{% block page_title %}Inicio{% endblock %}
 
 {% block content %}
-<!-- Tarjetas de estadísticas -->
-<div class="stats-grid">
-    <div class="stat-card">
-        <div class="stat-icon bg-primary">
-            <i class="bi bi-people"></i>
-        </div>
-        <div class="stat-content">
-            <div class="stat-value">{{ user.equipos.count|default:"0" }}</div>
-            <div class="stat-label">Equipos</div>
-        </div>
-        <a href="{% url 'equipos' %}" class="stat-link">
-            Ver todos <i class="bi bi-arrow-right"></i>
-        </a>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-icon bg-success">
-            <i class="bi bi-folder2-open"></i>
-        </div>
-        <div class="stat-content">
-            <div class="stat-value">{{ user.proyecto_set.all|length|default:"0" }}</div>
-            <div class="stat-label">Proyectos</div>
-        </div>
-        <a href="{% url 'proyectos' %}" class="stat-link">
-            Ver todos <i class="bi bi-arrow-right"></i>
-        </a>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-icon bg-warning">
-            <i class="bi bi-check2-circle"></i>
-        </div>
-        <div class="stat-content">
-            <div class="stat-value">{{ tareas|length|default:"0" }}</div>
-            <div class="stat-label">Tareas</div>
-        </div>
-        <a href="{% url 'tareas' %}" class="stat-link">
-            Ver todas <i class="bi bi-arrow-right"></i>
-        </a>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-icon bg-info">
-            <i class="bi bi-chat-left-text"></i>
-        </div>
-        <div class="stat-content">
-            <div class="stat-value">{{ user.comentario_set.count|default:"0" }}</div>
-            <div class="stat-label">Comentarios</div>
-        </div>
-        <a href="{% url 'comentarios' %}" class="stat-link">
-            Ver todos <i class="bi bi-arrow-right"></i>
-        </a>
-    </div>
-</div>
-
-<!-- Grid principal -->
-<div class="dashboard-grid">
-    <!-- Comentarios Recientes -->
-    <div class="card">
-        <div class="card-header">
-            <div class="card-title">
-                <i class="bi bi-chat-left-text"></i>
-                <h3>Comentarios Recientes</h3>
-            </div>
-        </div>
-        <div class="card-body">
-            {% if comentarios %}
-                <div class="activity-list">
-                    {% for comentario in comentarios %}
-                    <div class="activity-item">
-                        <div class="activity-avatar">
-                            {{ comentario.user.username|slice:":1"|upper }}
-                        </div>
-                        <div class="activity-content">
-                            <div class="activity-header">
-                                <strong>{{ comentario.user.username }}</strong>
-                                <span class="activity-time">{{ comentario.created|timesince }} atrás</span>
-                            </div>
-                            <p class="activity-text">{{ comentario.cuerpo|truncatechars:100 }}</p>
-                            {% if comentario.tarea %}
-                            <div class="activity-badge">
-                                <i class="bi bi-check-circle"></i>
-                                {{ comentario.tarea.contenido|truncatechars:40 }}
-                            </div>
-                            {% endif %}
-                        </div>
-                    </div>
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="empty-state">
-                    <i class="bi bi-chat-text"></i>
-                    <h4>No hay comentarios recientes</h4>
-                    <p>Comienza comentando en alguna tarea</p>
-                </div>
-            {% endif %}
-        </div>
-        <div class="card-footer">
-            <a href="{% url 'comentarios' %}" class="btn btn-outline">
-                Ver todos los comentarios
-            </a>
-        </div>
-    </div>
-
-    <!-- Tareas Próximas -->
-    <div class="card">
-        <div class="card-header">
-            <div class="card-title">
-                <i class="bi bi-clock"></i>
-                <h3>Tareas Próximas</h3>
-            </div>
-        </div>
-        <div class="card-body">
-            {% if tareas %}
-                <div class="task-list">
-                    {% for tarea in tareas %}
-                        {% if tarea.fecha_limite and not tarea.esta_vencida and tarea.dias_para_vencer != None and tarea.dias_para_vencer <= 3 %}
-                        <div class="task-item">
-                            <div class="task-header">
-                                <h4>{{ tarea.contenido|truncatechars:50 }}</h4>
-                                <span class="task-status status-{{ tarea.estado }}">
-                                    {{ tarea.get_estado_display }}
-                                </span>
-                            </div>
-                            
-                            <div class="task-meta">
-                                <div class="task-meta-item">
-                                    <i class="bi bi-person"></i>
-                                    <span>{{ tarea.asignado_a.username|default:"Sin asignar" }}</span>
-                                </div>
-                                <div class="task-meta-item">
-                                    <i class="bi bi-calendar"></i>
-                                    <span>{{ tarea.fecha_limite|date:"d M Y" }}</span>
-                                </div>
-                            </div>
-                            
-                            <div class="task-footer">
-                                {% if tarea.dias_para_vencer == 0 %}
-                                    <span class="task-badge badge-danger">Vence hoy</span>
-                                {% elif tarea.dias_para_vencer == 1 %}
-                                    <span class="task-badge badge-warning">Vence mañana</span>
-                                {% else %}
-                                    <span class="task-badge badge-info">Vence en {{ tarea.dias_para_vencer }} días</span>
-                                {% endif %}
-                                <a href="{% url 'tarea_detail' tarea.id %}" class="btn-link">
-                                    Ver detalles <i class="bi bi-arrow-right"></i>
-                                </a>
-                            </div>
-                        </div>
-                        {% endif %}
-                    {% endfor %}
-                </div>
-            {% else %}
-                <div class="empty-state">
-                    <i class="bi bi-check2-all"></i>
-                    <h4>No hay tareas próximas</h4>
-                    <p>Todas las tareas están al día</p>
-                </div>
-            {% endif %}
-        </div>
-        <div class="card-footer">
-            <a href="{% url 'tareas' %}" class="btn btn-outline">
-                Ver todas las tareas
-            </a>
-        </div>
-    </div>
-</div>
-
-<!-- Banner de bienvenida -->
+<!-- Welcome Banner -->
 <div class="welcome-banner">
     <div class="welcome-content">
         <div class="welcome-text">
-            <h2>¡Bienvenido a TaskFlow, {{ user.username }}!</h2>
-            <p>Gestiona tus equipos, proyectos y tareas de manera eficiente y colaborativa.</p>
+            <h2>¡Bienvenido, {{ user.username }}! 👋</h2>
+            <p>Aquí tienes un resumen de tu actividad reciente</p>
         </div>
         <div class="welcome-icon">
-            <i class="bi bi-kanban-fill"></i>
-        </div>
-    </div>
-    
-    <div class="welcome-features">
-        <div class="feature-item">
-            <i class="bi bi-people"></i>
-            <h4>Equipos</h4>
-            <p>Colabora con tu equipo</p>
-        </div>
-        <div class="feature-item">
-            <i class="bi bi-kanban"></i>
-            <h4>Tareas</h4>
-            <p>Organiza tus actividades</p>
-        </div>
-        <div class="feature-item">
-            <i class="bi bi-chat-dots"></i>
-            <h4>Comunicación</h4>
-            <p>Mantente al día</p>
-        </div>
-        <div class="feature-item">
-            <i class="bi bi-graph-up"></i>
-            <h4>Progreso</h4>
-            <p>Sigue tu avance</p>
+            <i class="bi bi-rocket-takeoff"></i>
         </div>
     </div>
 </div>
 
-<!-- Invitaciones pendientes (si existen) -->
+<!-- Invitaciones Pendientes -->
 {% if invitaciones_pendientes %}
 <div class="invitations-banner">
     <div class="invitations-header">
-        <i class="bi bi-envelope-heart"></i>
-        <h3>Tienes {{ invitaciones_pendientes|length }} invitación{{ invitaciones_pendientes|length|pluralize:"es" }} pendiente{{ invitaciones_pendientes|length|pluralize:"s" }}</h3>
+        <i class="bi bi-envelope-exclamation"></i>
+        <h3>Tienes {{ invitaciones_pendientes.count }} invitación{{ invitaciones_pendientes.count|pluralize:"es" }} pendiente{{ invitaciones_pendientes.count|pluralize:"s" }}</h3>
     </div>
     <div class="invitations-list">
         {% for invitacion in invitaciones_pendientes %}
@@ -226,12 +34,201 @@
                     <strong>{{ invitacion.equipo.numero }}</strong>
                 </div>
             </div>
-            <a href="{% url 'aceptar_invitacion' token=invitacion.token %}" class="btn btn-primary btn-sm">
-                Ver invitación
+            <a href="{% url 'aceptar_invitacion' invitacion.token %}" 
+               class="btn btn-sm btn-primary"
+               data-link>
+                <i class="bi bi-check-circle"></i>
+                <span>Ver invitación</span>
             </a>
         </div>
         {% endfor %}
     </div>
 </div>
 {% endif %}
+
+<!-- Stats Grid -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon bg-warning">
+            <i class="bi bi-clock-history"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">{{ tareas|length }}</div>
+            <div class="stat-label">Tareas Totales</div>
+        </div>
+        <a href="{% url 'tareas' %}" class="stat-link" data-link>
+            Ver todas <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon bg-success">
+            <i class="bi bi-check-circle-fill"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">{{ tareas|length }}</div>
+            <div class="stat-label">Tareas Activas</div>
+        </div>
+        <a href="{% url 'tareas' %}" class="stat-link" data-link>
+            Gestionar <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-icon bg-info">
+            <i class="bi bi-chat-left-text-fill"></i>
+        </div>
+        <div class="stat-content">
+            <div class="stat-value">{{ comentarios|length }}</div>
+            <div class="stat-label">Comentarios Recientes</div>
+        </div>
+        <a href="{% url 'comentarios' %}" class="stat-link" data-link>
+            Ver todos <i class="bi bi-arrow-right"></i>
+        </a>
+    </div>
+</div>
+
+<!-- Dashboard Grid -->
+<div class="dashboard-grid">
+    <!-- Actividad Reciente -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <i class="bi bi-activity"></i>
+                <h3>Actividad Reciente</h3>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if comentarios %}
+            <div class="activity-list">
+                {% for comentario in comentarios %}
+                <div class="activity-item">
+                    <div class="activity-avatar">
+                        {{ comentario.user.username|slice:":1"|upper }}
+                    </div>
+                    <div class="activity-content">
+                        <div class="activity-header">
+                            <span><strong>{{ comentario.user.username }}</strong> comentó en una tarea</span>
+                            <span class="activity-time">{{ comentario.created|timesince }} atrás</span>
+                        </div>
+                        <p class="activity-text">{{ comentario.cuerpo|truncatewords:15 }}</p>
+                        <div class="activity-badge">
+                            <i class="bi bi-clipboard-check"></i>
+                            {{ comentario.tarea.contenido|truncatewords:5 }}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="bi bi-inbox"></i>
+                <h4>No hay actividad reciente</h4>
+                <p>Los comentarios aparecerán aquí</p>
+            </div>
+            {% endif %}
+        </div>
+        {% if comentarios %}
+        <div class="card-footer">
+            <a href="{% url 'comentarios' %}" class="btn-link" data-link>
+                Ver todos los comentarios <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Tareas Pendientes -->
+    <div class="card">
+        <div class="card-header">
+            <div class="card-title">
+                <i class="bi bi-list-check"></i>
+                <h3>Mis Tareas</h3>
+            </div>
+        </div>
+        <div class="card-body">
+            {% if tareas %}
+            <div class="task-list">
+                {% for tarea in tareas|slice:":5" %}
+                <div class="task-item">
+                    <div class="task-header">
+                        <h4>{{ tarea.contenido|truncatewords:10 }}</h4>
+                        <span class="task-status status-{{ tarea.estado|lower }}">
+                            {{ tarea.get_estado_display }}
+                        </span>
+                    </div>
+                    <div class="task-meta">
+                        <span class="task-meta-item">
+                            <i class="bi bi-folder"></i>
+                            {{ tarea.proyecto.name }}
+                        </span>
+                        {% if tarea.fecha_limite %}
+                        <span class="task-meta-item">
+                            <i class="bi bi-calendar"></i>
+                            {{ tarea.fecha_limite|date:"d/m/Y" }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    <div class="task-footer">
+                        {% if tarea.asignado_a %}
+                        <span class="task-meta-item">
+                            <i class="bi bi-person"></i>
+                            {{ tarea.asignado_a.username }}
+                        </span>
+                        {% endif %}
+                        <a href="{% url 'tarea_detail' tarea.id %}" 
+                           class="btn btn-sm btn-outline"
+                           data-link>
+                            Ver detalles
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <i class="bi bi-check2-square"></i>
+                <h4>No tienes tareas</h4>
+                <p>Crea tu primera tarea para comenzar</p>
+            </div>
+            {% endif %}
+        </div>
+        {% if tareas %}
+        <div class="card-footer">
+            <a href="{% url 'tareas' %}" class="btn-link" data-link>
+                Ver todas las tareas <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="card">
+    <div class="card-header">
+        <div class="card-title">
+            <i class="bi bi-lightning"></i>
+            <h3>Acciones Rápidas</h3>
+        </div>
+    </div>
+    <div class="card-body">
+        <div class="action-buttons-grid">
+            <a href="{% url 'create_equipo' %}" class="btn btn-outline" data-link>
+                <i class="bi bi-people"></i>
+                <span>Crear Equipo</span>
+            </a>
+            <a href="{% url 'create_proyecto' %}" class="btn btn-outline" data-link>
+                <i class="bi bi-folder-plus"></i>
+                <span>Nuevo Proyecto</span>
+            </a>
+            <a href="{% url 'create_tarea' %}" class="btn btn-outline" data-link>
+                <i class="bi bi-plus-circle"></i>
+                <span>Nueva Tarea</span>
+            </a>
+            <a href="{% url 'create_comentario' %}" class="btn btn-outline" data-link>
+                <i class="bi bi-chat-left-dots"></i>
+                <span>Comentar</span>
+            </a>
+        </div>
+    </div>
+</div>
 {% endblock %}

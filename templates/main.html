@@ -3,7 +3,9 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <title>TaskFlow - {% block title %}Gestión de Proyectos{% endblock %}</title>
     
     <!-- Bootstrap Icons -->
@@ -17,27 +19,24 @@
     <!-- CSS Principal -->
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     
-    <!-- Estilos personalizados para el avatar -->
     <style>
-        .user-avatar-sm {
-            width: 48px !important;
-            height: 48px !important;
-            border-radius: 50% !important;
-            object-fit: cover !important;
-            border: 2px solid #e9ecef !important;
+        /* Fix crítico para móviles */
+        * {
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
         }
-
-        .avatar-placeholder-sm {
-            width: 48px !important;
-            height: 48px !important;
-            border-radius: 50% !important;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6) !important;
-            color: white !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            font-weight: 600 !important;
-            font-size: 1.125rem !important;
+        
+        a, button, input, select, textarea,
+        .nav-item, .btn, .topbar-btn, .dropdown-item,
+        .card, .alert-close, .menu-toggle {
+            touch-action: manipulation;
+            -webkit-user-select: none;
+            user-select: none;
+        }
+        
+        /* Evitar zoom en inputs en iOS */
+        input, select, textarea {
+            font-size: 16px !important;
         }
     </style>
     
@@ -46,7 +45,7 @@
 <body>
     {% block body %}
     {% if user.is_authenticated %}
-    <!-- Layout para usuarios autenticados -->
+    <!-- Layout autenticado -->
     <div class="app-container">
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
@@ -58,41 +57,41 @@
             </div>
             
             <nav class="sidebar-nav">
-                <a href="{% url 'home' %}" class="nav-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
+                <a href="{% url 'home' %}" class="nav-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}" data-link>
                     <i class="bi bi-house-door"></i>
                     <span>Inicio</span>
                 </a>
-                <a href="{% url 'equipos' %}" class="nav-item {% if 'equipo' in request.resolver_match.url_name %}active{% endif %}">
+                <a href="{% url 'equipos' %}" class="nav-item {% if 'equipo' in request.resolver_match.url_name %}active{% endif %}" data-link>
                     <i class="bi bi-people"></i>
                     <span>Equipos</span>
                 </a>
-                <a href="{% url 'proyectos' %}" class="nav-item {% if 'proyecto' in request.resolver_match.url_name %}active{% endif %}">
+                <a href="{% url 'proyectos' %}" class="nav-item {% if 'proyecto' in request.resolver_match.url_name %}active{% endif %}" data-link>
                     <i class="bi bi-folder2-open"></i>
                     <span>Proyectos</span>
                 </a>
-                <a href="{% url 'tareas' %}" class="nav-item {% if 'tarea' in request.resolver_match.url_name %}active{% endif %}">
+                <a href="{% url 'tareas' %}" class="nav-item {% if 'tarea' in request.resolver_match.url_name %}active{% endif %}" data-link>
                     <i class="bi bi-check2-circle"></i>
                     <span>Tareas</span>
                 </a>
-                <a href="{% url 'comentarios' %}" class="nav-item {% if 'comentario' in request.resolver_match.url_name %}active{% endif %}">
+                <a href="{% url 'comentarios' %}" class="nav-item {% if 'comentario' in request.resolver_match.url_name %}active{% endif %}" data-link>
                     <i class="bi bi-chat-left-text"></i>
                     <span>Comentarios</span>
                 </a>
-                <a href="{% url 'mostrar_profiles' %}" class="nav-item">
+                <a href="{% url 'mostrar_profiles' %}" class="nav-item" data-link>
                     <i class="bi bi-people-fill"></i>
                     <span>Usuarios</span>
                 </a>
             </nav>
         </aside>
 
-        <!-- Overlay para móviles -->
+        <!-- Overlay móvil -->
         <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
         <!-- Contenido principal -->
         <main class="main-content">
             <!-- Top Bar -->
             <header class="topbar">
-                <button class="menu-toggle" id="menuToggle">
+                <button class="menu-toggle" id="menuToggle" type="button" data-toggle-sidebar>
                     <i class="bi bi-list"></i>
                 </button>
                 
@@ -101,7 +100,7 @@
                 <div class="topbar-actions">
                     <!-- Usuario -->
                     <div class="user-dropdown">
-                        <button class="topbar-btn user-btn" id="userBtn">
+                        <button class="topbar-btn user-btn" id="userBtn" type="button" data-toggle-dropdown>
                             {% if user.perfil and user.perfil.imagen and user.perfil.imagen.name %}
                                 <img src="{{ user.perfil.imagen.url }}" alt="{{ user.username }}" class="user-avatar-sm">
                             {% else %}
@@ -110,13 +109,13 @@
                             <span class="user-name-mobile">{{ user.username }}</span>
                             <i class="bi bi-chevron-down"></i>
                         </button>
-                        <div class="dropdown-menu" id="userMenu">
-                            <a href="{% url 'profile_user' user.id %}" class="dropdown-item">
+                        <div class="dropdown-menu" id="userMenu" data-dropdown>
+                            <a href="{% url 'profile_user' user.id %}" class="dropdown-item" data-link>
                                 <i class="bi bi-person"></i>
                                 <span>Mi Perfil</span>
                             </a>
                             <div class="dropdown-divider"></div>
-                            <a href="{% url 'logout_user' %}" class="dropdown-item text-danger">
+                            <a href="{% url 'logout_user' %}" class="dropdown-item text-danger" data-link>
                                 <i class="bi bi-box-arrow-right"></i>
                                 <span>Cerrar Sesión</span>
                             </a>
@@ -129,7 +128,7 @@
             {% if messages %}
             <div class="messages-container">
                 {% for message in messages %}
-                <div class="alert alert-{{ message.tags }}" role="alert">
+                <div class="alert alert-{{ message.tags }}" role="alert" data-alert>
                     <i class="bi 
                         {% if message.tags == 'success' %}bi-check-circle-fill
                         {% elif message.tags == 'error' %}bi-exclamation-circle-fill
@@ -137,7 +136,7 @@
                         {% else %}bi-info-circle-fill{% endif %}">
                     </i>
                     <span>{{ message }}</span>
-                    <button class="alert-close">&times;</button>
+                    <button class="alert-close" type="button" data-close-alert>&times;</button>
                 </div>
                 {% endfor %}
             </div>
@@ -150,7 +149,7 @@
         </main>
     </div>
     {% else %}
-    <!-- Layout para usuarios no autenticados -->
+    <!-- Layout no autenticado -->
     <div class="auth-container">
         {% block auth_content %}{% endblock %}
     </div>
@@ -160,38 +159,103 @@
     <!-- JavaScript Principal -->
     <script src="{% static 'js/main.js' %}"></script>
     
-    <!-- JavaScript para dropdown de usuario -->
+    <!-- JavaScript optimizado para móviles -->
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Toggle del menú de usuario
-        const userBtn = document.getElementById('userBtn');
-        const userMenu = document.getElementById('userMenu');
+    (function() {
+        'use strict';
         
-        if (userBtn && userMenu) {
-            userBtn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                userMenu.classList.toggle('show');
-            });
+        // Prevenir delay de 300ms en móviles
+        document.addEventListener('touchstart', function(){}, {passive: true});
+        
+        // Función universal para manejar clicks/touch
+        function handleInteraction(element, callback) {
+            if (!element) return;
             
-            // Cerrar al hacer clic fuera
-            document.addEventListener('click', function(e) {
-                if (!userBtn.contains(e.target) && !userMenu.contains(e.target)) {
-                    userMenu.classList.remove('show');
+            let touchHandled = false;
+            
+            element.addEventListener('touchend', function(e) {
+                e.preventDefault();
+                touchHandled = true;
+                callback.call(this, e);
+                setTimeout(() => touchHandled = false, 300);
+            }, {passive: false});
+            
+            element.addEventListener('click', function(e) {
+                if (!touchHandled) {
+                    callback.call(this, e);
                 }
             });
         }
         
-        // Cerrar alertas
-        const alertCloses = document.querySelectorAll('.alert-close');
-        alertCloses.forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                this.parentElement.style.opacity = '0';
-                setTimeout(() => {
-                    this.parentElement.remove();
-                }, 300);
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle sidebar móvil
+            const menuToggle = document.querySelector('[data-toggle-sidebar]');
+            const sidebar = document.getElementById('sidebar');
+            const sidebarOverlay = document.getElementById('sidebarOverlay');
+            
+            if (menuToggle && sidebar && sidebarOverlay) {
+                handleInteraction(menuToggle, function(e) {
+                    e.stopPropagation();
+                    sidebar.classList.toggle('show');
+                    sidebarOverlay.classList.toggle('show');
+                    document.body.style.overflow = sidebar.classList.contains('show') ? 'hidden' : '';
+                });
+                
+                handleInteraction(sidebarOverlay, function() {
+                    sidebar.classList.remove('show');
+                    sidebarOverlay.classList.remove('show');
+                    document.body.style.overflow = '';
+                });
+            }
+            
+            // Toggle dropdown usuario
+            const userBtn = document.querySelector('[data-toggle-dropdown]');
+            const userMenu = document.querySelector('[data-dropdown]');
+            
+            if (userBtn && userMenu) {
+                handleInteraction(userBtn, function(e) {
+                    e.stopPropagation();
+                    userMenu.classList.toggle('show');
+                });
+                
+                // Cerrar al tocar fuera
+                document.addEventListener('touchend', function(e) {
+                    if (!userBtn.contains(e.target) && !userMenu.contains(e.target)) {
+                        userMenu.classList.remove('show');
+                    }
+                });
+                
+                document.addEventListener('click', function(e) {
+                    if (!userBtn.contains(e.target) && !userMenu.contains(e.target)) {
+                        userMenu.classList.remove('show');
+                    }
+                });
+            }
+            
+            // Cerrar alertas
+            const alertCloses = document.querySelectorAll('[data-close-alert]');
+            alertCloses.forEach(function(btn) {
+                handleInteraction(btn, function() {
+                    const alert = this.closest('[data-alert]');
+                    if (alert) {
+                        alert.style.opacity = '0';
+                        setTimeout(() => alert.remove(), 300);
+                    }
+                });
+            });
+            
+            // Mejorar navegación de links
+            const links = document.querySelectorAll('[data-link]');
+            links.forEach(function(link) {
+                handleInteraction(link, function(e) {
+                    const href = this.getAttribute('href');
+                    if (href && href !== '#') {
+                        window.location.href = href;
+                    }
+                });
             });
         });
-    });
+    })();
     </script>
     
     {% block extra_js %}{% endblock %}

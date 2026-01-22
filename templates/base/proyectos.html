@@ -1,131 +1,143 @@
 {% extends 'main.html' %}
 {% load static %}
 
-{% block title %}Mis Proyectos{% endblock %}
-{% block page_title %}Mis Proyectos{% endblock %}
+{% block page_title %}Proyectos{% endblock %}
 
 {% block content %}
-<!-- Header de la página -->
+<!-- Page Header -->
 <div class="page-header">
     <div class="page-header-content">
         <div class="page-header-text">
-            <h2>Todos tus proyectos</h2>
-            <p>Proyectos donde eres tutor o participas con tu equipo</p>
+            <h2>Mis Proyectos</h2>
+            <p>Administra todos tus proyectos en un solo lugar</p>
         </div>
-        <a href="{% url 'create_proyecto' %}" class="btn btn-primary">
+        <a href="{% url 'create_proyecto' %}" class="btn btn-primary" data-link>
             <i class="bi bi-plus-circle"></i>
             <span>Nuevo Proyecto</span>
         </a>
     </div>
 </div>
 
+<!-- Projects Grid -->
 {% if proyectos %}
-<!-- Grid de proyectos -->
 <div class="projects-grid">
     {% for proyecto in proyectos %}
     <div class="project-card">
-        <!-- Header del card -->
+        <!-- Project Header -->
         <div class="project-card-header">
             <div class="project-info">
                 <div class="project-icon">
-                    <i class="bi bi-folder-fill"></i>
+                    <i class="bi bi-folder2-open"></i>
                 </div>
                 <div class="project-title">
-                    <h3>{{ proyecto.name|truncatechars:30 }}</h3>
+                    <h3>{{ proyecto.name }}</h3>
                     <span class="project-type">{{ proyecto.get_tipo_display }}</span>
                 </div>
             </div>
-            <span class="project-badge {% if request.user == proyecto.tutor %}badge-success{% else %}badge-primary{% endif %}">
-                {% if request.user == proyecto.tutor %}
-                    <i class="bi bi-star-fill"></i> Tutor
-                {% else %}
-                    <i class="bi bi-person-check"></i> Participante
-                {% endif %}
-            </span>
         </div>
-        
-        <!-- Badges de estado y tareas -->
+
+        <!-- Project Badges -->
         <div class="project-badges">
             <span class="status-badge status-active">
                 <i class="bi bi-circle-fill"></i>
                 Activo
             </span>
             <span class="tasks-badge">
-                <i class="bi bi-check-circle"></i>
+                <i class="bi bi-check2-square"></i>
                 {{ proyecto.tareas.count }} tarea{{ proyecto.tareas.count|pluralize:"s" }}
             </span>
         </div>
-        
-        <!-- Metadata del proyecto -->
-        <div class="project-meta">
+
+        <!-- Project Meta -->
+        <div class="team-meta">
             <div class="meta-row">
                 <div class="meta-item">
                     <i class="bi bi-person-badge"></i>
                     <div>
-                        <span class="meta-label">Tutor del proyecto</span>
-                        <a href="{% url 'profile_user' proyecto.tutor.id %}" class="meta-value meta-link">
+                        <span class="meta-label">Tutor</span>
+                        <a href="{% url 'profile_user' proyecto.tutor.id %}" 
+                           class="meta-value meta-link"
+                           data-link>
                             {{ proyecto.tutor.username }}
                         </a>
                     </div>
                 </div>
-            </div>
-            
-            <div class="meta-row">
                 <div class="meta-item">
                     <i class="bi bi-people"></i>
                     <div>
                         <span class="meta-label">Equipo</span>
-                        <a href="{% url 'equipo_detail' proyecto.equipo.id %}" class="meta-value meta-link">
+                        <a href="{% url 'equipo_detail' proyecto.equipo.id %}" 
+                           class="meta-value meta-link"
+                           data-link>
                             Equipo {{ proyecto.equipo.numero }}
                         </a>
                     </div>
                 </div>
+            </div>
+            <div class="meta-row">
                 <div class="meta-item">
-                    <i class="bi bi-calendar-plus"></i>
+                    <i class="bi bi-calendar-event"></i>
                     <div>
                         <span class="meta-label">Creado</span>
-                        <span class="meta-value">{{ proyecto.created|timesince }} atrás</span>
+                        <span class="meta-value">{{ proyecto.created|date:"d/m/Y" }}</span>
+                    </div>
+                </div>
+                <div class="meta-item">
+                    <i class="bi bi-clock-history"></i>
+                    <div>
+                        <span class="meta-label">Actualizado</span>
+                        <span class="meta-value">{{ proyecto.updated|timesince }} atrás</span>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <!-- Progress bar (ejemplo visual) -->
+
+        <!-- Project Progress -->
+        {% with completadas=proyecto.tareas.filter|length total=proyecto.tareas.count %}
+        {% if total > 0 %}
         <div class="project-progress">
             <div class="progress-info">
                 <span class="progress-label">Progreso</span>
-                <span class="progress-value">
-                    {% widthratio proyecto.tareas.count proyecto.tareas.count 100 %}%
-                </span>
+                <span class="progress-value">{{ completadas }}/{{ total }} tareas</span>
             </div>
             <div class="progress-bar-container">
-                <div class="progress-bar-fill" style="width: {% widthratio proyecto.tareas.count proyecto.tareas.count 100 %}%"></div>
+                <div class="progress-bar-fill" style="width: {% widthratio completadas total 100 %}%"></div>
             </div>
         </div>
-        
-        <!-- Acciones -->
-        <div class="project-actions">
-            <a href="{% url 'proyecto_detail' proyecto.id %}" class="btn btn-outline btn-flex">
+        {% endif %}
+        {% endwith %}
+
+        <!-- Project Actions -->
+        <div class="team-actions">
+            <a href="{% url 'proyecto_detail' proyecto.id %}" 
+               class="btn btn-primary btn-flex"
+               data-link>
                 <i class="bi bi-eye"></i>
-                <span>Ver Detalles</span>
+                <span>Ver Proyecto</span>
             </a>
             
-            {% if request.user == proyecto.tutor %}
             <div class="action-buttons">
-                <a href="{% url 'proyecto_update' proyecto.id %}" class="btn-icon btn-icon-success" title="Editar">
+                {% if user == proyecto.tutor %}
+                <a href="{% url 'proyecto_update' proyecto.id %}" 
+                   class="btn-icon btn-icon-success"
+                   title="Editar"
+                   data-link>
                     <i class="bi bi-pencil"></i>
                 </a>
-                <a href="{% url 'proyecto_delete' proyecto.id %}" class="btn-icon btn-icon-danger" title="Eliminar">
+                <a href="{% url 'proyecto_delete' proyecto.id %}" 
+                   class="btn-icon btn-icon-danger"
+                   title="Eliminar"
+                   data-link>
                     <i class="bi bi-trash"></i>
                 </a>
+                {% endif %}
             </div>
-            {% endif %}
         </div>
     </div>
     {% endfor %}
 </div>
 
-<!-- Paginación info -->
+<!-- Pagination Info -->
 <div class="pagination-info">
     <p>Mostrando {{ proyectos|length }} proyecto{{ proyectos|length|pluralize:"s" }}</p>
 </div>
@@ -134,109 +146,29 @@
 <!-- Empty State -->
 <div class="empty-state-large">
     <div class="empty-icon">
-        <i class="bi bi-folder"></i>
+        <i class="bi bi-folder2-open"></i>
     </div>
     <h3>No tienes proyectos</h3>
-    <p>Crea tu primer proyecto para organizar tareas y colaborar con tu equipo en objetivos específicos.</p>
-    <a href="{% url 'create_proyecto' %}" class="btn btn-primary btn-large">
+    <p>Crea tu primer proyecto para organizar tus tareas y colaborar con tu equipo.</p>
+    <a href="{% url 'create_proyecto' %}" class="btn btn-primary btn-large" data-link>
         <i class="bi bi-plus-circle"></i>
         <span>Crear Mi Primer Proyecto</span>
     </a>
-    
+
     <div class="empty-features">
         <div class="feature-hint">
-            <i class="bi bi-check-circle"></i>
-            <span>Define objetivos claros</span>
+            <i class="bi bi-check-circle-fill"></i>
+            <span>Organiza tus tareas</span>
         </div>
         <div class="feature-hint">
-            <i class="bi bi-check-circle"></i>
-            <span>Organiza tareas por proyecto</span>
+            <i class="bi bi-check-circle-fill"></i>
+            <span>Trabaja en equipo</span>
         </div>
         <div class="feature-hint">
-            <i class="bi bi-check-circle"></i>
-            <span>Trabaja con tu equipo</span>
+            <i class="bi bi-check-circle-fill"></i>
+            <span>Seguimiento en tiempo real</span>
         </div>
     </div>
 </div>
 {% endif %}
-
-<style>
-/* Corrección del layout de acciones */
-.project-actions {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 1rem;
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid #e9ecef;
-}
-
-.action-buttons {
-    display: flex;
-    gap: 0.5rem;
-    align-items: center;
-}
-
-.btn-flex {
-    flex: 0 0 auto;
-}
-
-/* Asegurar que los botones de acción se vean bien */
-.btn-icon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 36px;
-    height: 36px;
-    border-radius: 8px;
-    transition: all 0.3s ease;
-    border: none;
-    cursor: pointer;
-}
-
-.btn-icon-success {
-    background: #10b981;
-    color: white;
-}
-
-.btn-icon-success:hover {
-    background: #059669;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-}
-
-.btn-icon-danger {
-    background: #ef4444;
-    color: white;
-}
-
-.btn-icon-danger:hover {
-    background: #dc2626;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-}
-
-.btn-icon i {
-    font-size: 1rem;
-}
-
-/* Responsive */
-@media (max-width: 640px) {
-    .project-actions {
-        flex-direction: column;
-        gap: 0.75rem;
-    }
-    
-    .btn-flex {
-        width: 100%;
-        justify-content: center;
-    }
-    
-    .action-buttons {
-        width: 100%;
-        justify-content: center;
-    }
-}
-</style>
 {% endblock %}

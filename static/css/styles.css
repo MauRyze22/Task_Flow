@@ -1,4 +1,45 @@
 /* ========================================
+   FIX PARA DISPOSITIVOS MÓVILES - TÁCTILES
+======================================== */
+
+/* Asegurar que los toques funcionen correctamente */
+* {
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+}
+
+/* Elementos interactivos */
+a, button, input, select, textarea, .nav-item, .btn, .topbar-btn, 
+.dropdown-item, .card, .task-card, .team-card, .project-card,
+.member-card, .stat-card, .alert-close, .menu-toggle,
+.toggle-password, .message-close, .modal-overlay {
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+    cursor: pointer;
+}
+
+/* Prevenir delays en clicks */
+a, button {
+    -ms-touch-action: manipulation;
+    touch-action: manipulation;
+}
+
+/* Mejorar área de toque en móviles */
+@media (max-width: 768px) {
+    .nav-item, .btn, .topbar-btn, .dropdown-item {
+        min-height: 44px; /* Tamaño mínimo recomendado por Apple */
+        display: flex;
+        align-items: center;
+    }
+    
+    button, a, input, select {
+        min-height: 44px;
+    }
+}
+
+
+/* ========================================
    VARIABLES Y RESET
 ======================================== */
 :root {

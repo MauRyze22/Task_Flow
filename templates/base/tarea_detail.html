@@ -1,75 +1,76 @@
-{% extends "main.html" %}
+{% extends 'main.html' %}
 {% load static %}
 
-{% block title %}{{ tarea.contenido|truncatechars:30 }}{% endblock %}
-{% block page_title %}Detalle de Tarea{% endblock %}
+{% block page_title %}{{ tarea.contenido|truncatewords:5 }}{% endblock %}
 
 {% block content %}
 <!-- Breadcrumb -->
 <div class="breadcrumb-nav">
-    <a href="{% url 'tareas' %}" class="breadcrumb-link">
+    <a href="{% url 'tareas' %}" class="breadcrumb-link" data-link>
         <i class="bi bi-arrow-left"></i>
         Volver a Tareas
     </a>
 </div>
 
+<!-- Detail Container -->
 <div class="detail-container">
-    <!-- Columna principal -->
+    <!-- Main Content -->
     <div class="detail-main">
-        <!-- Header de la tarea -->
+        <!-- Header Card -->
         <div class="card task-detail-header">
-            <div class="task-detail-top">
-                <div class="task-status-badge status-{{ tarea.estado }}">
-                    <i class="bi 
-                        {% if tarea.estado == 'pendiente' or tarea.estado == 'Pendiente' %}bi-clock
-                        {% elif tarea.estado == 'en_progreso' or tarea.estado == 'En_progreso' %}bi-arrow-right-circle
-                        {% elif tarea.estado == 'completada' or tarea.estado == 'Completada' %}bi-check-circle
-                        {% elif tarea.estado == 'pausada' or tarea.estado == 'Pausada' %}bi-pause-circle
-                        {% endif %}">
-                    </i>
-                    <span>{{ tarea.get_estado_display }}</span>
-                </div>
-                
-                {% if tarea.fecha_limite %}
-                <div class="task-deadline {% if tarea.esta_vencida %}overdue{% elif tarea.dias_para_vencer != None and tarea.dias_para_vencer <= 3 %}warning{% endif %}">
-                    <i class="bi bi-calendar-event"></i>
-                    <div>
-                        <span class="deadline-label">Vence:</span>
-                        <span class="deadline-date">{{ tarea.fecha_limite|date:"d M Y" }}</span>
-                        {% if tarea.dias_para_vencer != None %}
-                        <span class="deadline-countdown">
-                            {% if tarea.dias_para_vencer == 0 %}
-                                Hoy
-                            {% elif tarea.dias_para_vencer == 1 %}
-                                Mañana
-                            {% elif tarea.dias_para_vencer > 0 %}
-                                En {{ tarea.dias_para_vencer }} días
-                            {% else %}
-                                Vencida
+            <div class="card-body">
+                <div class="task-detail-top">
+                    <span class="task-status-badge status-{{ tarea.estado|lower }}">
+                        <i class="bi 
+                            {% if tarea.estado == 'pendiente' or tarea.estado == 'Pendiente' %}bi-clock-history
+                            {% elif tarea.estado == 'en_progreso' or tarea.estado == 'En_progreso' %}bi-hourglass-split
+                            {% elif tarea.estado == 'completada' or tarea.estado == 'Completada' %}bi-check-circle-fill
+                            {% else %}bi-pause-circle{% endif %}">
+                        </i>
+                        {{ tarea.get_estado_display }}
+                    </span>
+                    
+                    {% if tarea.fecha_limite %}
+                    <div class="task-deadline {% if tarea.esta_vencida %}overdue{% elif tarea.dias_para_vencer <= 3 %}warning{% endif %}">
+                        <i class="bi bi-calendar-event"></i>
+                        <div>
+                            <span class="deadline-label">Fecha Límite</span>
+                            <span class="deadline-date">{{ tarea.fecha_limite|date:"d/m/Y" }}</span>
+                            {% if tarea.dias_para_vencer %}
+                            <span class="deadline-countdown">
+                                {% if tarea.esta_vencida %}
+                                    Vencida
+                                {% else %}
+                                    Faltan {{ tarea.dias_para_vencer }} día{{ tarea.dias_para_vencer|pluralize:"s" }}
+                                {% endif %}
+                            </span>
                             {% endif %}
-                        </span>
-                        {% endif %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <h1 class="task-title">{{ tarea.contenido }}</h1>
+
+                {% if tarea.asignado_a %}
+                <div class="task-assignee-info">
+                    <div class="assignee-avatar-large">
+                        {{ tarea.asignado_a.username|slice:":1"|upper }}
+                    </div>
+                    <div>
+                        <span class="assignee-label">Asignado a</span>
+                        <a href="{% url 'profile_user' tarea.asignado_a.id %}" 
+                           class="assignee-name"
+                           data-link>
+                            {{ tarea.asignado_a.username }}
+                        </a>
                     </div>
                 </div>
                 {% endif %}
             </div>
-            
-            <h1 class="task-title">{{ tarea.contenido }}</h1>
-            
-            <div class="task-assignee-info">
-                <div class="assignee-avatar-large">
-                    {{ tarea.asignado_a.username|slice:":1"|upper }}
-                </div>
-                <div>
-                    <span class="assignee-label">Asignado a</span>
-                    <a href="{% url 'profile_user' tarea.asignado_a.id %}" class="assignee-name">
-                        {{ tarea.asignado_a.username }}
-                    </a>
-                </div>
-            </div>
         </div>
-        
-        <!-- Información de la tarea -->
+
+        <!-- Info Card -->
         <div class="card">
             <div class="card-header">
                 <div class="card-title">
@@ -78,238 +79,161 @@
                 </div>
             </div>
             <div class="card-body">
-                <div class="info-grid-detail">
-                    <div class="info-box">
-                        <div class="info-box-icon bg-primary">
-                            <i class="bi bi-folder"></i>
-                        </div>
-                        <div class="info-box-content">
-                            <span class="info-box-label">Proyecto</span>
-                            <a href="{% url 'proyecto_detail' tarea.proyecto.id %}" class="info-box-value info-box-link">
+                <div class="detail-list">
+                    <div class="detail-item">
+                        <i class="bi bi-folder"></i>
+                        <div>
+                            <span class="detail-label">Proyecto</span>
+                            <a href="{% url 'proyecto_detail' tarea.proyecto.id %}" 
+                               class="detail-value"
+                               data-link>
                                 {{ tarea.proyecto.name }}
                             </a>
                         </div>
                     </div>
-                    
-                    <div class="info-box">
-                        <div class="info-box-icon bg-success">
-                            <i class="bi bi-people"></i>
-                        </div>
-                        <div class="info-box-content">
-                            <span class="info-box-label">Equipo</span>
-                            <a href="{% url 'equipo_detail' tarea.proyecto.equipo.id %}" class="info-box-value info-box-link">
+
+                    <div class="detail-item">
+                        <i class="bi bi-people"></i>
+                        <div>
+                            <span class="detail-label">Equipo</span>
+                            <a href="{% url 'equipo_detail' tarea.proyecto.equipo.id %}" 
+                               class="detail-value"
+                               data-link>
                                 Equipo {{ tarea.proyecto.equipo.numero }}
                             </a>
                         </div>
                     </div>
-                    
-                    <div class="info-box">
-                        <div class="info-box-icon bg-info">
-                            <i class="bi bi-calendar-plus"></i>
-                        </div>
-                        <div class="info-box-content">
-                            <span class="info-box-label">Fecha de creación</span>
-                            <span class="info-box-value">{{ tarea.created|date:"d M Y" }}</span>
+
+                    <div class="detail-item">
+                        <i class="bi bi-person-badge"></i>
+                        <div>
+                            <span class="detail-label">Tutor del Proyecto</span>
+                            <a href="{% url 'profile_user' tarea.proyecto.tutor.id %}" 
+                               class="detail-value"
+                               data-link>
+                                {{ tarea.proyecto.tutor.username }}
+                            </a>
                         </div>
                     </div>
-                    
-                    <div class="info-box">
-                        <div class="info-box-icon bg-warning">
-                            <i class="bi bi-clock-history"></i>
+
+                    <div class="detail-item">
+                        <i class="bi bi-calendar-plus"></i>
+                        <div>
+                            <span class="detail-label">Fecha de Creación</span>
+                            <span class="detail-value">{{ tarea.created|date:"d/m/Y H:i" }}</span>
                         </div>
-                        <div class="info-box-content">
-                            <span class="info-box-label">Última actualización</span>
-                            <span class="info-box-value">{{ tarea.updated|timesince }} atrás</span>
+                    </div>
+
+                    <div class="detail-item">
+                        <i class="bi bi-clock-history"></i>
+                        <div>
+                            <span class="detail-label">Última Actualización</span>
+                            <span class="detail-value">{{ tarea.updated|timesince }} atrás</span>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <!-- Acciones -->
+    </div>
+
+    <!-- Sidebar -->
+    <div class="detail-sidebar">
+        <!-- Status Card -->
+        <div class="card task-status-card">
+            <div class="card-body">
+                <h4>Estado Actual</h4>
+                <div class="status-visual">
+                    <div class="status-icon status-icon-{{ tarea.estado|lower }}">
+                        <i class="bi 
+                            {% if tarea.estado == 'pendiente' or tarea.estado == 'Pendiente' %}bi-clock-history
+                            {% elif tarea.estado == 'en_progreso' or tarea.estado == 'En_progreso' %}bi-hourglass-split
+                            {% elif tarea.estado == 'completada' or tarea.estado == 'Completada' %}bi-check-circle-fill
+                            {% else %}bi-pause-circle{% endif %}">
+                        </i>
+                    </div>
+                    <div class="status-text">
+                        <span class="status-name">{{ tarea.get_estado_display }}</span>
+                        <span class="status-description">
+                            {% if tarea.estado == 'pendiente' or tarea.estado == 'Pendiente' %}
+                                Tarea por iniciar
+                            {% elif tarea.estado == 'en_progreso' or tarea.estado == 'En_progreso' %}
+                                Tarea en desarrollo
+                            {% elif tarea.estado == 'completada' or tarea.estado == 'Completada' %}
+                                Tarea finalizada
+                            {% else %}
+                                Tarea detenida
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Actions Card -->
         <div class="card">
             <div class="card-header">
                 <div class="card-title">
-                    <i class="bi bi-lightning-charge"></i>
+                    <i class="bi bi-lightning"></i>
                     <h3>Acciones</h3>
                 </div>
             </div>
             <div class="card-body">
                 <div class="action-buttons-list">
-                    <a href="{% url 'create_comentario' %}" class="action-btn action-btn-primary">
-                        <i class="bi bi-chat-left-text"></i>
+                    <a href="{% url 'create_comentario' %}" 
+                       class="action-btn action-btn-primary"
+                       data-link>
+                        <i class="bi bi-chat-left-dots"></i>
                         <span>Agregar Comentario</span>
                     </a>
                     
-                    {% if request.user == tarea.asignado_a or request.user == tarea.proyecto.tutor or request.user.is_staff %}
-                    <a href="{% url 'tarea_update' tarea.id %}" class="action-btn action-btn-success">
-                        <i class="bi bi-pencil-square"></i>
+                    {% if user == tarea.asignado_a or user == tarea.proyecto.tutor %}
+                    <a href="{% url 'tarea_update' tarea.id %}" 
+                       class="action-btn action-btn-success"
+                       data-link>
+                        <i class="bi bi-pencil"></i>
                         <span>Editar Tarea</span>
                     </a>
                     {% endif %}
                     
-                    {% if request.user == tarea.proyecto.tutor or request.user.is_staff %}
-                    <button onclick="confirmDelete()" class="action-btn action-btn-danger">
+                    {% if user == tarea.proyecto.tutor %}
+                    <a href="{% url 'tarea_delete' tarea.id %}" 
+                       class="action-btn action-btn-danger"
+                       data-link>
                         <i class="bi bi-trash"></i>
                         <span>Eliminar Tarea</span>
-                    </button>
+                    </a>
                     {% endif %}
                 </div>
             </div>
         </div>
-    </div>
-    
-    <!-- Sidebar -->
-    <div class="detail-sidebar">
-        <!-- Información adicional -->
-        <div class="card">
-            <div class="card-header">
-                <div class="card-title">
-                    <i class="bi bi-info-circle"></i>
-                    <h3>Detalles</h3>
-                </div>
-            </div>
-            <div class="card-body">
-                <div class="detail-list">
-                    <div class="detail-item">
-                        <i class="bi bi-person-badge"></i>
-                        <div>
-                            <span class="detail-label">Tutor del Proyecto</span>
-                            <a href="{% url 'profile_user' tarea.proyecto.tutor.id %}" class="detail-value">
-                                {{ tarea.proyecto.tutor.username }}
-                            </a>
-                        </div>
-                    </div>
-                    
-                    <div class="detail-item">
-                        <i class="bi bi-bookmark"></i>
-                        <div>
-                            <span class="detail-label">Tipo de Proyecto</span>
-                            <span class="detail-value">{{ tarea.proyecto.get_tipo_display }}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="detail-item">
-                        <i class="bi bi-people-fill"></i>
-                        <div>
-                            <span class="detail-label">Miembros del Equipo</span>
-                            <span class="detail-value">{{ tarea.proyecto.equipo.integrantes.count }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Estado visual -->
-        <div class="card task-status-card">
-            <h4>Estado Actual</h4>
-            <div class="status-visual">
-                <div class="status-icon status-icon-{{ tarea.estado }}">
-                    <i class="bi 
-                        {% if tarea.estado == 'pendiente' or tarea.estado == 'Pendiente' %}bi-clock
-                        {% elif tarea.estado == 'en_progreso' or tarea.estado == 'En_progreso' %}bi-arrow-right-circle
-                        {% elif tarea.estado == 'completada' or tarea.estado == 'Completada' %}bi-check-circle
-                        {% elif tarea.estado == 'pausada' or tarea.estado == 'Pausada' %}bi-pause-circle
-                        {% endif %}">
-                    </i>
-                </div>
-                <div class="status-text">
-                    <span class="status-name">{{ tarea.get_estado_display }}</span>
-                    <span class="status-description">
-                        {% if tarea.estado == 'pendiente' or tarea.estado == 'Pendiente' %}
-                            Esta tarea aún no ha iniciado
-                        {% elif tarea.estado == 'en_progreso' or tarea.estado == 'En_progreso' %}
-                            Trabajando en esta tarea
-                        {% elif tarea.estado == 'completada' or tarea.estado == 'Completada' %}
-                            Tarea finalizada exitosamente
-                        {% elif tarea.estado == 'pausada' or tarea.estado == 'Pausada' %}
-                            Tarea temporalmente pausada
-                        {% endif %}
-                    </span>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Timeline -->
+
+        <!-- Timeline Card -->
         <div class="card">
             <div class="card-header">
                 <div class="card-title">
                     <i class="bi bi-clock-history"></i>
-                    <h3>Línea de Tiempo</h3>
+                    <h3>Historial</h3>
                 </div>
             </div>
             <div class="card-body">
                 <div class="timeline">
                     <div class="timeline-item">
-                        <div class="timeline-marker bg-success"></div>
-                        <div class="timeline-content">
-                            <span class="timeline-title">Tarea Creada</span>
-                            <span class="timeline-time">{{ tarea.created|date:"d M Y, H:i" }}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="timeline-item">
                         <div class="timeline-marker bg-primary"></div>
                         <div class="timeline-content">
-                            <span class="timeline-title">Última Actualización</span>
+                            <span class="timeline-title">Tarea creada</span>
+                            <span class="timeline-time">{{ tarea.created|date:"d/m/Y H:i" }}</span>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-info"></div>
+                        <div class="timeline-content">
+                            <span class="timeline-title">Última actualización</span>
                             <span class="timeline-time">{{ tarea.updated|timesince }} atrás</span>
                         </div>
                     </div>
-                    
-                    {% if tarea.fecha_limite %}
-                    <div class="timeline-item">
-                        <div class="timeline-marker {% if tarea.esta_vencida %}bg-danger{% else %}bg-warning{% endif %}"></div>
-                        <div class="timeline-content">
-                            <span class="timeline-title">Fecha Límite</span>
-                            <span class="timeline-time">{{ tarea.fecha_limite|date:"d M Y" }}</span>
-                        </div>
-                    </div>
-                    {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<!-- Modal de confirmación -->
-<div class="modal-overlay" id="deleteModal">
-    <div class="modal-content">
-        <div class="modal-header-danger">
-            <i class="bi bi-exclamation-triangle"></i>
-            <h3>¿Eliminar tarea?</h3>
-        </div>
-        <div class="modal-body">
-            <p>Esta acción no se puede deshacer. Se eliminarán todos los comentarios y datos relacionados con esta tarea.</p>
-        </div>
-        <div class="modal-actions">
-            <button class="btn btn-secondary" onclick="closeDeleteModal()">
-                Cancelar
-            </button>
-            <a href="{% url 'tarea_delete' tarea.id %}" class="btn btn-danger">
-                Sí, eliminar
-            </a>
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-function confirmDelete() {
-    document.getElementById('deleteModal').classList.add('show');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeDeleteModal() {
-    document.getElementById('deleteModal').classList.remove('show');
-    document.body.style.overflow = '';
-}
-
-// Cerrar modal al hacer clic fuera
-document.getElementById('deleteModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeDeleteModal();
-    }
-});
-</script>
 {% endblock %}

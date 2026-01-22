@@ -458,3 +458,10 @@ if (emailInput) {
         wrapper.classList.remove('error');
     });
 }
+
+// Mejorar respuesta táctil en todos los enlaces y botones
+document.querySelectorAll('a, button').forEach(el => {
+    el.addEventListener('touchstart', function() {
+        // Esto ayuda a que el navegador detecte mejor los toques
+    }, { passive: true });
+});

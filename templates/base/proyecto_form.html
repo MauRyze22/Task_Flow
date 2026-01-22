@@ -1,54 +1,63 @@
-{% extends "main.html" %}
+{% extends 'main.html' %}
 {% load static %}
 
-{% block title %}{% if page == 'crear' %}Crear Proyecto{% else %}Editar Proyecto{% endif %}{% endblock %}
-{% block page_title %}{% if page == 'crear' %}Nuevo Proyecto{% else %}Editar Proyecto{% endif %}{% endblock %}
+{% block page_title %}
+    {% if proyecto %}Editar Proyecto{% else %}Crear Proyecto{% endif %}
+{% endblock %}
 
 {% block content %}
 <div class="form-page-container">
     <div class="form-card">
-        <!-- Header del formulario -->
+        <!-- Form Header -->
         <div class="form-header">
-            <div class="form-icon project-icon-gradient">
-                <i class="bi bi-folder-fill"></i>
+            <div class="form-icon">
+                <i class="bi bi-folder2-open"></i>
             </div>
             <div class="form-header-text">
-                <h2>{% if page == 'crear' %}Crear Nuevo Proyecto{% else %}Modificar Proyecto{% endif %}</h2>
-                <p>{% if page == 'crear' %}Completa los datos para iniciar un nuevo proyecto{% else %}Actualiza la información del proyecto{% endif %}</p>
+                <h2>{% if proyecto %}Editar Proyecto{% else %}Crear Nuevo Proyecto{% endif %}</h2>
+                <p>{% if proyecto %}Actualiza la información del proyecto{% else %}Completa los datos para crear un proyecto{% endif %}</p>
             </div>
         </div>
-        
-        <!-- Formulario -->
-        <form method="POST" class="profile-form" id="proyectoForm">
+
+        <!-- Form Messages -->
+        {% if messages %}
+        <div class="auth-messages">
+            {% for message in messages %}
+            <div class="message message-{{ message.tags }}">
+                <i class="bi 
+                    {% if message.tags == 'success' %}bi-check-circle-fill
+                    {% elif message.tags == 'error' %}bi-exclamation-circle-fill
+                    {% else %}bi-info-circle-fill{% endif %}">
+                </i>
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Form -->
+        <form method="POST" id="proyectoForm">
             {% csrf_token %}
             
             <div class="form-grid">
                 {% for field in form %}
-                <div class="form-field {% if 'descripcion' in field.name or 'objetivo' in field.name %}form-field-full{% endif %} {% if field.field.required %}required{% endif %}">
+                <div class="form-field {% if field.name == 'descripcion' %}col-span-2{% endif %}">
                     <label for="{{ field.id_for_label }}" class="field-label">
                         {{ field.label }}
-                        {% if field.field.required %}<span class="required-mark">*</span>{% endif %}
+                        {% if field.field.required %}
+                        <span class="required-mark">*</span>
+                        {% endif %}
                     </label>
                     
                     <div class="field-wrapper {% if field.errors %}has-error{% endif %}">
-                        {% if 'name' in field.name or 'nombre' in field.name %}
-                            <i class="field-icon bi bi-tag"></i>
-                        {% elif 'tutor' in field.name %}
-                            <i class="field-icon bi bi-person-badge"></i>
-                        {% elif 'equipo' in field.name %}
-                            <i class="field-icon bi bi-people"></i>
-                        {% elif 'tipo' in field.name %}
-                            <i class="field-icon bi bi-bookmark"></i>
-                        {% elif 'objetivo' in field.name %}
-                            <i class="field-icon bi bi-bullseye"></i>
-                        {% elif 'descripcion' in field.name %}
-                            <i class="field-icon bi bi-text-left"></i>
-                        {% else %}
-                            <i class="field-icon bi bi-pencil"></i>
-                        {% endif %}
-                        
+                        <i class="field-icon bi 
+                            {% if field.name == 'name' %}bi-pencil
+                            {% elif field.name == 'tutor' %}bi-person-badge
+                            {% elif field.name == 'equipo' %}bi-people
+                            {% elif field.name == 'tipo' %}bi-tag
+                            {% else %}bi-pencil{% endif %}">
+                        </i>
                         {{ field }}
-                        
                         {% if field.errors %}
                         <i class="field-status bi bi-exclamation-circle"></i>
                         {% endif %}
@@ -59,142 +68,41 @@
                     {% endif %}
                     
                     {% if field.errors %}
+                    {% for error in field.errors %}
                     <div class="field-error">
-                        <i class="bi bi-x-circle"></i>
-                        {% for error in field.errors %}
-                            {{ error }}
-                        {% endfor %}
+                        <i class="bi bi-exclamation-circle"></i>
+                        <span>{{ error }}</span>
                     </div>
+                    {% endfor %}
                     {% endif %}
                 </div>
                 {% endfor %}
             </div>
-            
-            <!-- Información importante -->
-            <div class="form-info-banner">
-                <i class="bi bi-lightbulb"></i>
-                <div>
-                    <strong>Información importante:</strong>
-                    <p>Solo puedes crear proyectos para equipos en los que participas como jefe o integrante.</p>
-                </div>
-            </div>
-            
-            <!-- Botones de acción -->
+
+            <!-- Form Actions -->
             <div class="form-actions">
-                <a href="{% if page != 'crear' %}{% url 'proyecto_detail' proyecto.id %}{% else %}{% url 'proyectos' %}{% endif %}" class="btn btn-secondary">
-                    <i class="bi bi-arrow-left"></i>
+                <a href="{% url 'proyectos' %}" class="btn btn-secondary" data-link>
+                    <i class="bi bi-x-circle"></i>
                     <span>Cancelar</span>
                 </a>
-                <button type="submit" class="btn btn-primary" id="submitBtn">
-                    <i class="bi bi-{% if page == 'crear' %}plus-circle{% else %}check-circle{% endif %}"></i>
-                    <span>{% if page == 'crear' %}Crear Proyecto{% else %}Actualizar Proyecto{% endif %}</span>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi {% if proyecto %}bi-check-circle{% else %}bi-plus-circle{% endif %}"></i>
+                    <span>{% if proyecto %}Guardar Cambios{% else %}Crear Proyecto{% endif %}</span>
                 </button>
             </div>
         </form>
+
+        <!-- Form Info -->
+        <div class="form-info">
+            <i class="bi bi-info-circle"></i>
+            <p>
+                {% if proyecto %}
+                    Los cambios se aplicarán inmediatamente a todas las tareas asociadas al proyecto.
+                {% else %}
+                    Selecciona el equipo que trabajará en este proyecto. El tutor será el responsable principal.
+                {% endif %}
+            </p>
+        </div>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-// Validación y efectos visuales
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('proyectoForm');
-    const inputs = form.querySelectorAll('input, select, textarea');
-    
-    // Animación al hacer focus
-    inputs.forEach(input => {
-        input.addEventListener('focus', function() {
-            this.closest('.field-wrapper').classList.add('focused');
-        });
-        
-        input.addEventListener('blur', function() {
-            this.closest('.field-wrapper').classList.remove('focused');
-            
-            // Validar campo
-            if (this.value.trim() !== '' || this.selectedOptions?.length > 0) {
-                this.closest('.field-wrapper').classList.add('has-value');
-            } else {
-                this.closest('.field-wrapper').classList.remove('has-value');
-            }
-        });
-        
-        // Marcar campos con valor inicial
-        if (input.value.trim() !== '' || input.selectedOptions?.length > 0) {
-            input.closest('.field-wrapper').classList.add('has-value');
-        }
-    });
-    
-    // Contador de caracteres para textarea
-    const textareas = form.querySelectorAll('textarea');
-    textareas.forEach(textarea => {
-        const maxLength = textarea.getAttribute('maxlength');
-        if (maxLength) {
-            const wrapper = textarea.closest('.field-wrapper');
-            const counter = document.createElement('div');
-            counter.className = 'char-counter';
-            counter.textContent = `0 / ${maxLength}`;
-            wrapper.appendChild(counter);
-            
-            textarea.addEventListener('input', function() {
-                const count = this.value.length;
-                counter.textContent = `${count} / ${maxLength}`;
-                counter.style.color = count > maxLength * 0.9 ? 'var(--danger)' : 'var(--gray-500)';
-            });
-            
-            // Inicializar contador
-            if (textarea.value) {
-                textarea.dispatchEvent(new Event('input'));
-            }
-        }
-    });
-    
-    // Animación al enviar
-    form.addEventListener('submit', function(e) {
-        const submitBtn = document.getElementById('submitBtn');
-        const btnText = submitBtn.querySelector('span');
-        const btnIcon = submitBtn.querySelector('i');
-        
-        submitBtn.disabled = true;
-        btnIcon.className = 'bi bi-arrow-clockwise rotating';
-        btnText.textContent = 'Guardando...';
-    });
-});
-</script>
-
-<style>
-/* Estilos adicionales para este formulario */
-.project-icon-gradient {
-    background: linear-gradient(135deg, #10B981, #34D399) !important;
-}
-
-.form-field-full {
-    grid-column: 1 / -1;
-}
-
-textarea {
-    min-height: 120px;
-    resize: vertical;
-}
-
-.char-counter {
-    position: absolute;
-    bottom: 12px;
-    right: 12px;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--gray-500);
-    pointer-events: none;
-    background: var(--white);
-    padding: 2px 6px;
-    border-radius: 4px;
-    z-index: 2;
-}
-
-@media (max-width: 768px) {
-    .form-field-full {
-        grid-column: 1;
-    }
-}
-</style>
 {% endblock %}

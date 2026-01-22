@@ -1,30 +1,29 @@
 {% extends 'main.html' %}
 {% load static %}
 
-{% block title %}Mis Equipos{% endblock %}
-{% block page_title %}Mis Equipos{% endblock %}
+{% block page_title %}Equipos{% endblock %}
 
 {% block content %}
-<!-- Header de la página -->
+<!-- Page Header -->
 <div class="page-header">
     <div class="page-header-content">
         <div class="page-header-text">
-            <h2>Todos tus equipos</h2>
-            <p>Equipos en los que participas como integrante o jefe</p>
+            <h2>Mis Equipos</h2>
+            <p>Gestiona tus equipos de trabajo y colaboración</p>
         </div>
-        <a href="{% url 'create_equipo' %}" class="btn btn-primary">
+        <a href="{% url 'create_equipo' %}" class="btn btn-primary" data-link>
             <i class="bi bi-plus-circle"></i>
-            <span>Nuevo Equipo</span>
+            <span>Crear Equipo</span>
         </a>
     </div>
 </div>
 
+<!-- Teams Grid -->
 {% if equipos %}
-<!-- Grid de equipos -->
 <div class="teams-grid">
     {% for equipo in equipos %}
     <div class="team-card">
-        <!-- Header del card -->
+        <!-- Team Header -->
         <div class="team-card-header">
             <div class="team-info">
                 <div class="team-icon">
@@ -32,58 +31,47 @@
                 </div>
                 <div class="team-title">
                     <h3>Equipo {{ equipo.numero }}</h3>
-                    <span class="team-subtitle">{{ equipo.nombre|default:"Sin nombre" }}</span>
+                    <span class="team-subtitle">{{ equipo.integrantes.count }} miembro{{ equipo.integrantes.count|pluralize:"s" }}</span>
                 </div>
             </div>
-            <span class="team-badge {% if request.user == equipo.jefe %}badge-success{% else %}badge-primary{% endif %}">
-                {% if request.user == equipo.jefe %}
-                    <i class="bi bi-star-fill"></i> Jefe
-                {% else %}
-                    <i class="bi bi-person-check"></i> Integrante
-                {% endif %}
+            {% if user == equipo.jefe %}
+            <span class="team-badge badge-success">
+                <i class="bi bi-star-fill"></i>
+                Jefe
             </span>
+            {% else %}
+            <span class="team-badge badge-primary">
+                <i class="bi bi-person-check"></i>
+                Miembro
+            </span>
+            {% endif %}
         </div>
-        
-        <!-- Descripción (si existe) -->
-        {% if equipo.descripcion %}
-        <div class="team-description">
-            <p>{{ equipo.descripcion|truncatechars:100 }}</p>
-        </div>
-        {% endif %}
-        
-        <!-- Metadata del equipo -->
+
+        <!-- Team Meta -->
         <div class="team-meta">
             <div class="meta-row">
                 <div class="meta-item">
                     <i class="bi bi-person-badge"></i>
                     <div>
                         <span class="meta-label">Jefe del equipo</span>
-                        <a href="{% url 'profile_user' equipo.jefe.id %}" class="meta-value meta-link">
+                        <a href="{% url 'profile_user' equipo.jefe.id %}" 
+                           class="meta-value meta-link"
+                           data-link>
                             {{ equipo.jefe.username }}
                         </a>
                     </div>
                 </div>
-            </div>
-            
-            <div class="meta-row">
                 <div class="meta-item">
-                    <i class="bi bi-people"></i>
-                    <div>
-                        <span class="meta-label">Integrantes</span>
-                        <span class="meta-value">{{ equipo.integrantes.count }} miembro{{ equipo.integrantes.count|pluralize:"s" }}</span>
-                    </div>
-                </div>
-                <div class="meta-item">
-                    <i class="bi bi-calendar-plus"></i>
+                    <i class="bi bi-calendar-event"></i>
                     <div>
                         <span class="meta-label">Creado</span>
-                        <span class="meta-value">{{ equipo.created|timesince }} atrás</span>
+                        <span class="meta-value">{{ equipo.created|date:"d/m/Y" }}</span>
                     </div>
                 </div>
             </div>
         </div>
-        
-        <!-- Avatares de integrantes (preview) -->
+
+        <!-- Team Members Preview -->
         <div class="team-members-preview">
             <div class="members-avatars">
                 {% for integrante in equipo.integrantes.all|slice:":4" %}
@@ -98,30 +86,38 @@
                 {% endif %}
             </div>
         </div>
-        
-        <!-- Acciones -->
+
+        <!-- Team Actions -->
         <div class="team-actions">
-            <a href="{% url 'equipo_detail' equipo.id %}" class="btn btn-outline btn-flex">
+            <a href="{% url 'equipo_detail' equipo.id %}" 
+               class="btn btn-primary btn-flex"
+               data-link>
                 <i class="bi bi-eye"></i>
-                <span>Ver Detalles</span>
+                <span>Ver Equipo</span>
             </a>
             
-            {% if request.user == equipo.jefe %}
             <div class="action-buttons">
-                <a href="{% url 'equipo_update' equipo.id %}" class="btn-icon btn-icon-success" title="Editar">
+                {% if user == equipo.jefe %}
+                <a href="{% url 'equipo_update' equipo.id %}" 
+                   class="btn-icon btn-icon-success"
+                   title="Editar"
+                   data-link>
                     <i class="bi bi-pencil"></i>
                 </a>
-                <a href="{% url 'equipo_delete' equipo.id %}" class="btn-icon btn-icon-danger" title="Eliminar">
+                <a href="{% url 'equipo_delete' equipo.id %}" 
+                   class="btn-icon btn-icon-danger"
+                   title="Eliminar"
+                   data-link>
                     <i class="bi bi-trash"></i>
                 </a>
+                {% endif %}
             </div>
-            {% endif %}
         </div>
     </div>
     {% endfor %}
 </div>
 
-<!-- Paginación (si la implementas después) -->
+<!-- Pagination Info -->
 <div class="pagination-info">
     <p>Mostrando {{ equipos|length }} equipo{{ equipos|length|pluralize:"s" }}</p>
 </div>
@@ -132,25 +128,25 @@
     <div class="empty-icon">
         <i class="bi bi-people"></i>
     </div>
-    <h3>No perteneces a ningún equipo</h3>
-    <p>Crea tu primer equipo para comenzar a colaborar con otros usuarios en proyectos y tareas.</p>
-    <a href="{% url 'create_equipo' %}" class="btn btn-primary btn-large">
+    <h3>No tienes equipos aún</h3>
+    <p>Crea tu primer equipo para comenzar a colaborar con otros usuarios y gestionar proyectos en conjunto.</p>
+    <a href="{% url 'create_equipo' %}" class="btn btn-primary btn-large" data-link>
         <i class="bi bi-plus-circle"></i>
         <span>Crear Mi Primer Equipo</span>
     </a>
-    
+
     <div class="empty-features">
         <div class="feature-hint">
-            <i class="bi bi-check-circle"></i>
-            <span>Organiza proyectos en equipo</span>
+            <i class="bi bi-check-circle-fill"></i>
+            <span>Colaboración en tiempo real</span>
         </div>
         <div class="feature-hint">
-            <i class="bi bi-check-circle"></i>
-            <span>Asigna tareas a miembros</span>
+            <i class="bi bi-check-circle-fill"></i>
+            <span>Gestión de proyectos</span>
         </div>
         <div class="feature-hint">
-            <i class="bi bi-check-circle"></i>
-            <span>Colabora en tiempo real</span>
+            <i class="bi bi-check-circle-fill"></i>
+            <span>Asignación de tareas</span>
         </div>
     </div>
 </div>

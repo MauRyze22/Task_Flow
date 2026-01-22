@@ -1,46 +1,61 @@
-{% extends "main.html" %}
+{% extends 'main.html' %}
 {% load static %}
 
-{% block title %}{% if page == 'crear' %}Crear Comentario{% else %}Editar Comentario{% endif %}{% endblock %}
-{% block page_title %}{% if page == 'crear' %}Nuevo Comentario{% else %}Editar Comentario{% endif %}{% endblock %}
+{% block page_title %}
+    {% if comentario %}Editar Comentario{% else %}Crear Comentario{% endif %}
+{% endblock %}
 
 {% block content %}
 <div class="form-page-container">
     <div class="form-card">
-        <!-- Header del formulario -->
+        <!-- Form Header -->
         <div class="form-header">
-            <div class="form-icon comment-icon-gradient">
-                <i class="bi bi-chat-left-text-fill"></i>
+            <div class="form-icon">
+                <i class="bi bi-chat-left-text"></i>
             </div>
             <div class="form-header-text">
-                <h2>{% if page == 'crear' %}Crear Nuevo Comentario{% else %}Editar Comentario{% endif %}</h2>
-                <p>{% if page == 'crear' %}Comparte tu opinión o actualización sobre una tarea{% else %}Modifica tu comentario{% endif %}</p>
+                <h2>{% if comentario %}Editar Comentario{% else %}Nuevo Comentario{% endif %}</h2>
+                <p>{% if comentario %}Actualiza tu comentario{% else %}Agrega un comentario a una tarea{% endif %}</p>
             </div>
         </div>
-        
-        <!-- Formulario -->
-        <form method="POST" class="profile-form" id="comentarioForm">
+
+        <!-- Form Messages -->
+        {% if messages %}
+        <div class="auth-messages">
+            {% for message in messages %}
+            <div class="message message-{{ message.tags }}">
+                <i class="bi 
+                    {% if message.tags == 'success' %}bi-check-circle-fill
+                    {% elif message.tags == 'error' %}bi-exclamation-circle-fill
+                    {% else %}bi-info-circle-fill{% endif %}">
+                </i>
+                <span>{{ message }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Form -->
+        <form method="POST" id="comentarioForm">
             {% csrf_token %}
             
             <div class="form-grid">
                 {% for field in form %}
-                <div class="form-field form-field-full {% if field.field.required %}required{% endif %}">
+                <div class="form-field {% if field.name == 'cuerpo' %}col-span-2{% endif %}">
                     <label for="{{ field.id_for_label }}" class="field-label">
                         {{ field.label }}
-                        {% if field.field.required %}<span class="required-mark">*</span>{% endif %}
+                        {% if field.field.required %}
+                        <span class="required-mark">*</span>
+                        {% endif %}
                     </label>
                     
                     <div class="field-wrapper {% if field.errors %}has-error{% endif %}">
-                        {% if 'tarea' in field.name %}
-                            <i class="field-icon bi bi-check-circle"></i>
-                        {% elif 'cuerpo' in field.name or 'contenido' in field.name or 'mensaje' in field.name %}
-                            <i class="field-icon bi bi-chat-text"></i>
-                        {% else %}
-                            <i class="field-icon bi bi-pencil"></i>
-                        {% endif %}
-                        
+                        <i class="field-icon bi 
+                            {% if field.name == 'tarea' %}bi-check2-circle
+                            {% elif field.name == 'cuerpo' %}bi-chat-left-text
+                            {% else %}bi-pencil{% endif %}">
+                        </i>
                         {{ field }}
-                        
                         {% if field.errors %}
                         <i class="field-status bi bi-exclamation-circle"></i>
                         {% endif %}
@@ -51,208 +66,41 @@
                     {% endif %}
                     
                     {% if field.errors %}
+                    {% for error in field.errors %}
                     <div class="field-error">
-                        <i class="bi bi-x-circle"></i>
-                        {% for error in field.errors %}
-                            {{ error }}
-                        {% endfor %}
+                        <i class="bi bi-exclamation-circle"></i>
+                        <span>{{ error }}</span>
                     </div>
+                    {% endfor %}
                     {% endif %}
                 </div>
                 {% endfor %}
             </div>
-            
-            <!-- Información importante -->
-            <div class="form-info-banner comment-info-banner">
-                <i class="bi bi-info-circle"></i>
-                <div>
-                    <strong>Información importante:</strong>
-                    <p>Los comentarios son visibles para todos los miembros del equipo del proyecto. Sé claro y respetuoso en tu comunicación.</p>
-                </div>
-            </div>
-            
-            <!-- Botones de acción -->
+
+            <!-- Form Actions -->
             <div class="form-actions">
-                <a href="{% url 'comentarios' %}" class="btn btn-secondary">
-                    <i class="bi bi-arrow-left"></i>
+                <a href="{% url 'comentarios' %}" class="btn btn-secondary" data-link>
+                    <i class="bi bi-x-circle"></i>
                     <span>Cancelar</span>
                 </a>
-                <button type="submit" class="btn btn-primary" id="submitBtn">
-                    <i class="bi bi-{% if page == 'crear' %}send{% else %}check-circle{% endif %}"></i>
-                    <span>{% if page == 'crear' %}Publicar Comentario{% else %}Actualizar Comentario{% endif %}</span>
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi {% if comentario %}bi-check-circle{% else %}bi-send{% endif %}"></i>
+                    <span>{% if comentario %}Guardar Cambios{% else %}Publicar Comentario{% endif %}</span>
                 </button>
             </div>
         </form>
+
+        <!-- Form Info -->
+        <div class="form-info">
+            <i class="bi bi-info-circle"></i>
+            <p>
+                {% if comentario %}
+                    Solo puedes editar comentarios que tú has creado.
+                {% else %}
+                    Tu comentario será visible para todos los miembros del proyecto asociado a la tarea.
+                {% endif %}
+            </p>
+        </div>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-// Validación y efectos visuales
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('comentarioForm');
-    const inputs = form.querySelectorAll('input, select, textarea');
-    
-    // Animación al hacer focus
-    inputs.forEach(input => {
-        input.addEventListener('focus', function() {
-            this.closest('.field-wrapper').classList.add('focused');
-        });
-        
-        input.addEventListener('blur', function() {
-            this.closest('.field-wrapper').classList.remove('focused');
-            
-            // Validar campo
-            if (this.value.trim() !== '' || this.selectedOptions?.length > 0) {
-                this.closest('.field-wrapper').classList.add('has-value');
-            } else {
-                this.closest('.field-wrapper').classList.remove('has-value');
-            }
-        });
-        
-        // Marcar campos con valor inicial
-        if (input.value.trim() !== '' || input.selectedOptions?.length > 0) {
-            input.closest('.field-wrapper').classList.add('has-value');
-        }
-    });
-    
-    // Contador de caracteres para textarea
-    const textarea = form.querySelector('textarea');
-    if (textarea) {
-        const maxLength = textarea.getAttribute('maxlength') || 500;
-        const wrapper = textarea.closest('.field-wrapper');
-        
-        // Crear contador
-        const counter = document.createElement('div');
-        counter.className = 'char-counter';
-        counter.textContent = `0 / ${maxLength}`;
-        wrapper.appendChild(counter);
-        
-        // Actualizar contador
-        textarea.addEventListener('input', function() {
-            const count = this.value.length;
-            counter.textContent = `${count} / ${maxLength}`;
-            counter.style.color = count > maxLength * 0.9 ? 'var(--danger)' : 'var(--gray-500)';
-            
-            // Advertencia si está cerca del límite
-            if (count > maxLength * 0.95) {
-                counter.style.fontWeight = '700';
-                counter.style.animation = 'pulse 1s infinite';
-            } else {
-                counter.style.fontWeight = '600';
-                counter.style.animation = 'none';
-            }
-        });
-        
-        // Inicializar contador
-        if (textarea.value) {
-            textarea.dispatchEvent(new Event('input'));
-        }
-        
-        // Preview del comentario
-        const preview = document.createElement('div');
-        preview.className = 'comment-preview';
-        preview.innerHTML = '<strong>Vista previa:</strong><div class="preview-content"></div>';
-        wrapper.parentNode.appendChild(preview);
-        
-        textarea.addEventListener('input', function() {
-            const content = preview.querySelector('.preview-content');
-            content.textContent = this.value || 'Escribe algo para ver la vista previa...';
-        });
-    }
-    
-    // Animación al enviar
-    form.addEventListener('submit', function(e) {
-        const submitBtn = document.getElementById('submitBtn');
-        const btnText = submitBtn.querySelector('span');
-        const btnIcon = submitBtn.querySelector('i');
-        
-        submitBtn.disabled = true;
-        btnIcon.className = 'bi bi-arrow-clockwise rotating';
-        btnText.textContent = 'Publicando...';
-    });
-});
-</script>
-
-<style>
-/* Estilos adicionales para este formulario */
-.comment-icon-gradient {
-    background: linear-gradient(135deg, #3B82F6, #60A5FA) !important;
-}
-
-.form-field-full {
-    grid-column: 1 / -1;
-}
-
-textarea {
-    min-height: 150px;
-    resize: vertical;
-    font-family: inherit;
-    line-height: 1.6;
-}
-
-.char-counter {
-    position: absolute;
-    bottom: 12px;
-    right: 12px;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--gray-500);
-    pointer-events: none;
-    background: var(--white);
-    padding: 4px 8px;
-    border-radius: 4px;
-    z-index: 2;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.6; }
-}
-
-.comment-preview {
-    margin-top: 16px;
-    padding: 16px;
-    background: var(--gray-50);
-    border-radius: var(--border-radius-sm);
-    border-left: 4px solid #3B82F6;
-}
-
-.comment-preview strong {
-    display: block;
-    font-size: 13px;
-    color: var(--gray-700);
-    margin-bottom: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.preview-content {
-    font-size: 15px;
-    color: var(--gray-900);
-    line-height: 1.6;
-    min-height: 40px;
-}
-
-.comment-info-banner {
-    background: #DBEAFE !important;
-    border-left-color: #3B82F6 !important;
-}
-
-.comment-info-banner i {
-    color: #3B82F6 !important;
-}
-
-@media (max-width: 768px) {
-    .form-field-full {
-        grid-column: 1;
-    }
-    
-    textarea {
-        min-height: 120px;
-    }
-}
-</style>
 {% endblock %}

@@ -1,120 +1,100 @@
-{% extends "main.html" %}
+{% extends 'main.html' %}
 {% load static %}
 
-{% block title %}Confirmar Eliminación{% endblock %}
 {% block page_title %}Confirmar Eliminación{% endblock %}
 
 {% block content %}
 <div class="delete-page-container">
     <div class="delete-card">
-        <!-- Ícono de advertencia -->
         <div class="delete-icon">
-            <i class="bi bi-exclamation-triangle"></i>
+            <i class="bi bi-exclamation-triangle-fill"></i>
         </div>
-        
-        <!-- Título -->
-        <h2 class="delete-title">¿Estás seguro?</h2>
+
+        <h1 class="delete-title">¿Estás seguro?</h1>
         <p class="delete-subtitle">Esta acción no se puede deshacer</p>
-        
-        <!-- Información del item a eliminar -->
+
+        <!-- Delete Item Info -->
         <div class="delete-item-info">
             {% if equipo %}
-                <div class="item-icon bg-primary">
-                    <i class="bi bi-people"></i>
-                </div>
-                <div class="item-details">
-                    <span class="item-type">Equipo</span>
-                    <span class="item-name">{{ equipo.numero }}</span>
-                    {% if equipo.nombre %}
-                        <span class="item-description">{{ equipo.nombre }}</span>
-                    {% endif %}
-                </div>
-            {% endif %}
-            
-            {% if proyecto %}
-                <div class="item-icon bg-success">
-                    <i class="bi bi-folder"></i>
-                </div>
-                <div class="item-details">
-                    <span class="item-type">Proyecto</span>
-                    <span class="item-name">{{ proyecto.name }}</span>
-                    {% if proyecto.equipo %}
-                        <span class="item-description">Equipo {{ proyecto.equipo.numero }}</span>
-                    {% endif %}
-                </div>
-            {% endif %}
-            
-            {% if tarea %}
-                <div class="item-icon bg-warning">
-                    <i class="bi bi-check-circle"></i>
-                </div>
-                <div class="item-details">
-                    <span class="item-type">Tarea</span>
-                    <span class="item-name">{{ tarea.contenido|truncatechars:50 }}</span>
-                    <span class="item-description">Proyecto: {{ tarea.proyecto.name }}</span>
-                </div>
-            {% endif %}
-            
-            {% if comentario %}
-                <div class="item-icon bg-info">
-                    <i class="bi bi-chat-text"></i>
-                </div>
-                <div class="item-details">
-                    <span class="item-type">Comentario</span>
-                    <span class="item-name">Por {{ comentario.user.username }}</span>
-                    <span class="item-description">{{ comentario.cuerpo|truncatechars:100 }}</span>
-                </div>
+            <div class="item-icon bg-primary">
+                <i class="bi bi-people-fill"></i>
+            </div>
+            <div class="item-details">
+                <span class="item-type">Equipo</span>
+                <h3 class="item-name">Equipo {{ equipo.numero }}</h3>
+                <p class="item-description">{{ equipo.integrantes.count }} miembro{{ equipo.integrantes.count|pluralize:"s" }}</p>
+            </div>
+            {% elif proyecto %}
+            <div class="item-icon bg-success">
+                <i class="bi bi-folder2-open"></i>
+            </div>
+            <div class="item-details">
+                <span class="item-type">Proyecto</span>
+                <h3 class="item-name">{{ proyecto.name }}</h3>
+                <p class="item-description">{{ proyecto.tareas.count }} tarea{{ proyecto.tareas.count|pluralize:"s" }} asociada{{ proyecto.tareas.count|pluralize:"s" }}</p>
+            </div>
+            {% elif tarea %}
+            <div class="item-icon bg-warning">
+                <i class="bi bi-check2-circle"></i>
+            </div>
+            <div class="item-details">
+                <span class="item-type">Tarea</span>
+                <h3 class="item-name">{{ tarea.contenido|truncatewords:10 }}</h3>
+                <p class="item-description">Proyecto: {{ tarea.proyecto.name }}</p>
+            </div>
+            {% elif comentario %}
+            <div class="item-icon bg-info">
+                <i class="bi bi-chat-left-text"></i>
+            </div>
+            <div class="item-details">
+                <span class="item-type">Comentario</span>
+                <h3 class="item-name">{{ comentario.cuerpo|truncatewords:10 }}</h3>
+                <p class="item-description">En: {{ comentario.tarea.contenido|truncatewords:5 }}</p>
+            </div>
             {% endif %}
         </div>
-        
-        <!-- Banner de advertencia -->
+
+        <!-- Delete Warning -->
         <div class="delete-warning">
-            <i class="bi bi-exclamation-circle"></i>
+            <i class="bi bi-exclamation-triangle-fill"></i>
             <div>
                 <strong>¡Atención!</strong>
-                <p>Se eliminarán todos los datos relacionados permanentemente. Esta acción es irreversible.</p>
+                <p>
+                    {% if equipo %}
+                        Al eliminar este equipo, también se eliminarán todos los proyectos y tareas asociados. Los miembros del equipo no serán afectados.
+                    {% elif proyecto %}
+                        Al eliminar este proyecto, también se eliminarán todas las tareas y comentarios asociados.
+                    {% elif tarea %}
+                        Al eliminar esta tarea, también se eliminarán todos los comentarios asociados.
+                    {% elif comentario %}
+                        Este comentario será eliminado permanentemente.
+                    {% endif %}
+                </p>
             </div>
         </div>
-        
-        <!-- Formulario -->
-        <form method="POST" class="delete-form" id="deleteForm">
+
+        <!-- Delete Actions -->
+        <form method="POST" id="deleteForm">
             {% csrf_token %}
-            
             <div class="delete-actions">
-                <a href="javascript:history.back()" class="btn btn-secondary btn-large">
-                    <i class="bi bi-x-circle"></i>
+                <button type="button" 
+                        class="btn btn-secondary btn-large"
+                        onclick="window.history.back()">
+                    <i class="bi bi-arrow-left"></i>
                     <span>Cancelar</span>
-                </a>
-                <button type="submit" class="btn btn-danger btn-large" id="deleteBtn">
+                </button>
+                <button type="submit" class="btn btn-danger btn-large">
                     <i class="bi bi-trash"></i>
                     <span>Sí, Eliminar</span>
                 </button>
             </div>
         </form>
-        
-        <!-- Info adicional -->
+
+        <!-- Delete Footer -->
         <div class="delete-footer">
-            <i class="bi bi-info-circle"></i>
-            <span>Puedes cancelar esta acción presionando "Cancelar"</span>
+            <i class="bi bi-shield-check"></i>
+            <span>Esta acción requiere confirmación</span>
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_js %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    const form = document.getElementById('deleteForm');
-    const deleteBtn = document.getElementById('deleteBtn');
-    
-    form.addEventListener('submit', function(e) {
-        const btnText = deleteBtn.querySelector('span');
-        const btnIcon = deleteBtn.querySelector('i');
-        
-        deleteBtn.disabled = true;
-        btnIcon.className = 'bi bi-arrow-clockwise rotating';
-        btnText.textContent = 'Eliminando...';
-    });
-});
-</script>
 {% endblock %}
