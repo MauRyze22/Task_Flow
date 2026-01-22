@@ -68,7 +68,12 @@ pip install -r requirements.txt
 
 # 4. Configurar variables de entorno
 cp .env.example .env
-# Edita .env con tus datos (SECRET_KEY, DATABASE, etc.)
+# Edita .env con tus datos:
+DB_NAME = nombre
+DB_USER = usuario_postgres
+DB_PASSWORD = tucontraseña
+DB_HOST = 127.0.0.1 #para local
+DB_PORT = 5432 #puerto
 
 # 5. Aplicar migraciones y crear superusuario
 python manage.py makemigrations
