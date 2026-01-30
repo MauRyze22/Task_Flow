@@ -72,17 +72,25 @@ def register_user(request):
 
     if request.method == 'POST':
         form = RegisterForm(request.POST)
-        perfil_form = PerfilForm(request.POST)
 
-        if form.is_valid() and perfil_form.is_valid():
+        if form.is_valid():
+            request.session['numero'] = form.cleaned_data.get('numero')
+            request.session['pais'] = form.cleaned_data.get('pais')
+            
             user = form.save(commit=False)
             user.username = user.username.lower()
             user.email = request.POST.get('email')
             user.save()
-            perfil = perfil_form.save(commit=False)
-            perfil.user = user
-            perfil.save()
             login(request, user)
+            
+            if hasattr(user, 'perfil'):
+                user.perfil.numero = request.session.get('numero')
+                user.perfil.pais = request.session.get('pais')
+                user.perfil.save()
+            
+            del request.session['numero']
+            del request.session['pais']     
+                  
             return redirect('home')
         else:
             messages.error(request, "Formulario no valido")
@@ -420,7 +428,7 @@ def tarea_update(request, pk):
 def tarea_delete(request, pk):
     tarea = get_object_or_404(Tarea, id=pk)
 
-    if request.user != tarea.proyecto.tutor or not request.user.is_staff:
+    if request.user != tarea.proyecto.tutor and not request.user.is_staff:
         return HttpResponseForbidden('No puedes acceder a esta informacion')
 
     if request.method == 'POST':

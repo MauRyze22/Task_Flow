@@ -31,8 +31,8 @@ class ComentarioForm(forms.ModelForm):
 class RegisterForm(UserCreationForm):
     email = forms.EmailField(required=True)
     numero = forms.CharField(max_length = 20, required = False)
+    pais = forms.CharField(max_length=20, required=False)
     
-         
          
 class PerfilForm(forms.ModelForm):
     class Meta:
