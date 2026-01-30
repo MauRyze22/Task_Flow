@@ -1,114 +1,151 @@
 # TaskFlow
 
-**Gestión inteligente de tareas, proyectos y equipos**  
-con roles, permisos estrictos, invitaciones seguras y comentarios en tiempo real.
+**Sistema de gestión de tareas, proyectos y equipos con control de permisos granular**
 
-[![GitHub top language](https://img.shields.io/github/languages/top/MauRyze22/Task_Flow)](https://github.com/MauRyze22/Task_Flow)
-[![GitHub stars](https://img.shields.io/github/stars/MauRyze22/Task_Flow?style=social)](https://github.com/MauRyze22/Task_Flow)
-[![GitHub last commit](https://img.shields.io/github/last-commit/MauRyze22/Task_Flow)](https://github.com/MauRyze22/Task_Flow)
+[![Django](https://img.shields.io/badge/Django-4.2-green.svg)](https://www.djangoproject.com/)
+[![Python](https://img.shields.io/badge/Python-3.10+-blue.svg)](https://www.python.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-12+-blue.svg)](https://www.postgresql.org/)
 
-## 📸 Vistas previas
+🔗 **[Demo en vivo](https://taskflow-production.up.railway.app)** *(próximamente)*
+
+---
+
+## 📸 Screenshots
 
 <p align="center">
-  <img src="screenshots/dashboard.png" alt="Dashboard principal" width="45%">
-  <img src="screenshots/teams.png" alt="Todos los proyectos en tiempo real" width="45%">
+  <img src="screenshots/dashboard.png" alt="Dashboard" width="49%">
+  <img src="screenshots/teams.png" alt="Equipos" width="49%">
 </p>
 <p align="center">
-  <img src="screenshots/task-comments.png" alt="Comentarios en tiempo real" width="45%">
-  <img src="screenshots/profile-user.png" alt="Sistema de logueo de usuario" width="45%">
+  <img src="screenshots/task-comments.png" alt="Comentarios" width="49%">
+  <img src="screenshots/profile-user.png" alt="Perfil" width="49%">
 </p>
 
-## 📖 Sobre el proyecto
+---
 
-TaskFlow es una aplicación web completa para **gestionar tareas, proyectos y equipos** de forma segura.  
-Nace para resolver el problema típico de herramientas gratuitas: o son demasiado simples (y caóticas) o demasiado caras y complejas.
+## 🎯 ¿Qué problema resuelve?
 
-Aquí cada usuario solo ve y edita **lo que le corresponde** según su rol.
+Herramientas gratuitas como Trello son demasiado simples (sin control de permisos). Herramientas como Jira son caras ($15-30/usuario/mes) y complejas.
 
-## ✨ Características principales
+**TaskFlow** ofrece:
+- ✅ Control de acceso estricto (cada usuario solo ve sus proyectos/tareas)
+- ✅ 4 roles jerárquicos (Admin, Jefe, Miembro, Invitado)
+- ✅ Sistema de invitaciones por email controlado
+- ✅ Notificaciones automáticas al completar tareas
+- ✅ 100% gratuito y open source
 
-- ✅ Creación y gestión de proyectos y tareas
-- ✅ Sistema de roles y permisos granular (Administrador, Jefe de equipo, Miembro, Invitado)
-- ✅ Invitaciones seguras por email (solo jefes pueden invitar)
-- ✅ Comentarios en tiempo real en cada tarea
-- ✅ Panel personal con mis tareas pendientes
-- ✅ Edición de perfil de usuario: actualización de datos personales y foto de perfil
-- ✅ Autenticación segura con Django (login, registro, cambio de contraseña)
-- ✅ Soporte completo para PostgreSQL (fácil de deployar)
+**Ideal para:** Equipos de 3-20 personas que necesitan colaborar sin pagar SaaS caros.
 
-## 🛠️ Tecnologías utilizadas
+---
 
-- **Backend**: Python 3.10+ • Django
-- **Frontend**: HTML5 • CSS3 • JavaScript • Bootstrap
-- **Base de datos**: PostgreSQL (producción) + SQLite (pruebas rápidas)
-- **Autenticación**: Django contrib.auth (built-in)
-- **Otros**: python-dotenv (para variables de entorno)
+## ⚡ Features principales
 
-## 🚀 Instalación rápida (desarrollo)
+**Gestión colaborativa:**
+- CRUD completo de proyectos, equipos y tareas
+- Comentarios en tiempo real en cada tarea
+- Dashboard personalizado con resumen de actividad
+- Filtrado avanzado de tareas por proyecto, estado, asignado
 
-### Requisitos previos
+**Seguridad y permisos:**
+- Control granular basado en roles
+- Solo jefes de equipo pueden invitar miembros
+- Validación automática de asignaciones
 
-- Python 3.10+  
-- PostgreSQL (o usa SQLite para pruebas rápidas)  
-- Git
+**Notificaciones:**
+- Emails automáticos al completar tareas (a todo el equipo)
+- Sistema de invitaciones por Gmail
 
-### Pasos
+---
+
+## 🛠️ Stack tecnológico
+
+- **Backend:** Python 3.10+ | Django 4.2
+- **Base de datos:** PostgreSQL (producción) | SQLite (desarrollo)
+- **Frontend:** HTML5, CSS3, JavaScript, Bootstrap 5
+- **Deployment:** Railway | Gunicorn
+- **Otros:** Django Signals, ORM optimizado (`select_related`/`prefetch_related`)
+
+---
+
+## 🚀 Instalación local
+
+### Requisitos
+- Python 3.10+
+- PostgreSQL 12+ (o SQLite para pruebas rápidas)
+
+### Setup
 
 ```bash
-# 1. Clonar el repositorio
+# Clonar repositorio
 git clone https://github.com/MauRyze22/Task_Flow.git
 cd Task_Flow
 
-# 2. Crear y activar entorno virtual
+# Crear entorno virtual
 python -m venv venv
-source venv/bin/activate    # Windows: venv\Scripts\activate
+source venv/bin/activate  # Windows: venv\Scripts\activate
 
-# 3. Instalar dependencias
+# Instalar dependencias
 pip install -r requirements.txt
 
-# 4. Configurar variables de entorno
+# Configurar variables de entorno
 cp .env.example .env
-# Edita .env con tus datos:
-DB_NAME = nombre
-DB_USER = usuario_postgres
-DB_PASSWORD = tucontraseña
-DB_HOST = 127.0.0.1 #para local
-DB_PORT = 5432 #puerto
+# Edita .env con tus datos (DB, email, SECRET_KEY)
 
-# 5. Aplicar migraciones y crear superusuario
-python manage.py makemigrations
+# Migraciones y superusuario
 python manage.py migrate
 python manage.py createsuperuser
 
-# 6. Correr el servidor
+# Ejecutar servidor
 python manage.py runserver
+```
+
+Abre http://127.0.0.1:8000
+
+---
+
+## 📚 Estructura del proyecto
 
 ```
-## 🤝 Contribuir
+Task_Flow/
+├── taskflow/          # Configuración Django
+├── tasks/             # App principal (models, views, forms)
+├── templates/         # HTML templates
+├── static/            # CSS, JS, imágenes
+├── screenshots/       # Capturas para README
+├── requirements.txt   # Dependencias
+└── .env.example       # Plantilla de variables
+```
 
-Este es un proyecto personal de portafolio mientras aprendo Django.  
-Por ahora no acepto contribuciones externas, pero ¡cualquier sugerencia o feedback es súper bienvenido!  
-Abre un issue con ideas, bugs o mejoras que veas. Gracias por el interés 🚀
+---
 
-## ✉️ Sobre mí / Contacto
+## 🤝 Sobre este proyecto
 
-Hola, soy **Amaury Monteagudo** — desarrollador backend en formación, enfocado en Python, Django, APIs seguras y bases de datos.
+Proyecto de portfolio personal para demostrar habilidades en:
 
-Este proyecto (TaskFlow) forma parte de mi portafolio personal para demostrar habilidades en:
+✓ Autenticación y autorización con roles personalizados  
+✓ Optimización de queries (N+1 problem, eager loading)  
+✓ Django Signals para eventos automáticos  
+✓ Deployment en producción con PostgreSQL  
 
-- Autenticación y autorización (RBAC con roles y permisos granulares)
-- Gestión de usuarios y equipos colaborativos
-- Invitaciones seguras y control de acceso
-- Buenas prácticas de Django (migraciones, entornos, PostgreSQL)
+**Feedback y sugerencias son bienvenidos** → [Abrir issue](https://github.com/MauRyze22/Task_Flow/issues)
 
-Estoy aprendiendo y mejorando constantemente, así que cualquier feedback, sugerencia o issue es **muy bienvenido** — ¡me ayuda a crecer!
+---
 
-📧 Email: amaurymonteagudop22@gmail.com  
-🔗 GitHub: [@MauRyze22](https://github.com/MauRyze22)  
-🔗 LinkedIn: [linkedin.com/in/amaury-monteagudo](https://www.linkedin.com/in/amaury-monteagudo-40375b3a5)
+## 📬 Contacto
 
-¡Gracias por tomarte el tiempo de ver mi proyecto! 🚀 Cualquier comentario suma muchísimo. 💙
+**Amaury Monteagudo** — Backend Developer
+
+Especializado en Python, Django, APIs REST y bases de datos.
+
+📧 amaurymonteagudop22@gmail.com  
+🔗 [GitHub](https://github.com/MauRyze22) | [LinkedIn](https://www.linkedin.com/in/amaury-monteagudo-40375b3a5)
+
+---
 
 ## 📄 Licencia
 
-[MIT License](LICENSE) — puedes usar, modificar y distribuir el código libremente (con el aviso de copyright).
+[MIT License](LICENSE) — Uso libre con atribución.
+
+---
+
+⭐ **Si este proyecto te fue útil, considera darle una estrella — ¡gracias!**
