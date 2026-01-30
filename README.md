@@ -108,7 +108,7 @@ Abre http://127.0.0.1:8000
 ```
 Task_Flow/
 ├── taskflow/          # Configuración Django
-├── tasks/             # App principal (models, views, forms)
+├── base/             # App principal (models, views, forms)
 ├── templates/         # HTML templates
 ├── static/            # CSS, JS, imágenes
 ├── screenshots/       # Capturas para README
