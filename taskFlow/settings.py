@@ -28,6 +28,29 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 
 ALLOWED_HOSTS=config('ALLOWED_HOSTS', cast=Csv())
 
+# CSRF Trusted Origins
+CSRF_TRUSTED_ORIGINS = [
+    'https://supportflow-production.up.railway.app/',          # tu dominio exacto
+    'https://*.railway.app',                                   # wildcard para cubrir todos los subdominios .up.railway.app
+    'https://supportflow-production.up.railway.app/',
+]
+
+if not DEBUG:
+    railway_domain = config('RAILWAY_PUBLIC_DOMAIN', default='')
+    if railway_domain:
+        CSRF_TRUSTED_ORIGINS.append(f'https://{railway_domain}')
+    
+    CSRF_TRUSTED_ORIGINS.append('https://web-production-ee2b0.up.railway.app')
+
+# Security settings
+if not DEBUG:
+    SECURE_SSL_REDIRECT = False
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    CSRF_COOKIE_SAMESITE = 'Lax'
+    SESSION_COOKIE_SAMESITE = 'Lax'
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
 # Application definition
 
 INSTALLED_APPS = [
