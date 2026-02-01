@@ -130,7 +130,10 @@ def actualizar_profile(request, pk):
     if request.method == 'POST':
         form = PerfilForm(request.POST, request.FILES, instance=perfil)
         if form.is_valid():
-            form.save()
+            perfil = form.save(commit=False)
+            perfil.user.email = perfil.email
+            perfil.user.save()
+            perfil.save()
             return redirect('profile_user', request.user.id)
 
     
