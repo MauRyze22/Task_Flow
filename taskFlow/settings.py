@@ -29,11 +29,7 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 ALLOWED_HOSTS=config('ALLOWED_HOSTS', cast=Csv())
 
 # CSRF Trusted Origins
-CSRF_TRUSTED_ORIGINS = [
-    'https://supportflow-production.up.railway.app/',          # tu dominio exacto
-    'https://*.railway.app',                                   # wildcard para cubrir todos los subdominios .up.railway.app
-    'https://supportflow-production.up.railway.app/',
-]
+CSRF_TRUSTED_ORIGINS = config('CSRF_TRUSTED_ORIGINS', default='', cast=Csv())
 
 if not DEBUG:
     railway_domain = config('RAILWAY_PUBLIC_DOMAIN', default='')
@@ -121,7 +117,7 @@ else:
     DATABASES = {
             'default': {
                 'ENGINE':'django.db.backends.sqlite3',
-                'NAME': BASE_DIR / 'sqlite3',
+                'NAME': BASE_DIR / 'db.sqlite3',
             }
     }
 # Password validation
