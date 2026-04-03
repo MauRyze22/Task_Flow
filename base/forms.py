@@ -37,8 +37,7 @@ class RegisterForm(UserCreationForm):
 class PerfilForm(forms.ModelForm):
     class Meta:
         model = Perfil
-        fields = ['user', 'numero', 'email', 'imagen', 'pais', 'rol']
-        exclude = ['user']
+        fields = ['numero', 'email', 'imagen', 'pais', 'rol']
         
 
 class InvitacionForm(forms.ModelForm):
