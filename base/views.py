@@ -10,7 +10,10 @@ from django.contrib.auth.models import User
 from django.db.models import Q
 from django.urls import reverse
 from django.conf import settings
-from django.core.mail import send_mail
+from decouple import config
+import resend
+
+resend.api_key = config('RESEND_API_KEY')
 
 # Create your views here.
 
@@ -557,7 +560,7 @@ def enviar_invitacion(request, pk):
                 
             if invitado.email:
                 subject = f'Hola {invitado.username}'
-                message =(
+                text =(
                         f'Hola {invitado.username},\n\n'
                         f'Usted ha sido invitado al equipo {equipo.numero} por {request.user.username}.\n\n'
                         f'Si desea aceptar, haga clic en el siguiente enlace:\n'
@@ -565,7 +568,7 @@ def enviar_invitacion(request, pk):
                         f'Saludos,\n'
                         f'TaskFlow'
                         )
-                send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [invitado.email], fail_silently=False,)
+                resend.Eails.send({'subject':subject, 'text':text, 'from':'SupportFlow <onboarding@resend.dev>', 'to': [invitado.email]})
                     
                 messages.success(request, 'Invitacion enviada correctamente')
                 return redirect('profile_user', pk = pk)
