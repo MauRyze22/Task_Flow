@@ -568,7 +568,7 @@ def enviar_invitacion(request, pk):
                         f'Saludos,\n'
                         f'TaskFlow'
                         )
-                resend.Eails.send({'subject':subject, 'text':text, 'from':'SupportFlow <onboarding@resend.dev>', 'to': [invitado.email]})
+                resend.Emails.send({'subject':subject, 'text':text, 'from':'SupportFlow <onboarding@resend.dev>', 'to': [invitado.email]})
                     
                 messages.success(request, 'Invitacion enviada correctamente')
                 return redirect('profile_user', pk = pk)
