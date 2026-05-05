@@ -1,7 +1,6 @@
 from django.contrib import admin
-from .models import Equipo, Tarea, Proyecto, Comentario, Perfil
 
-# Register your models here.
+from base.models import Comentario, Equipo, Perfil, Proyecto, Tarea
 
 admin.site.register(Tarea)
 admin.site.register(Equipo)
