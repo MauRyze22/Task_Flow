@@ -1,92 +1,96 @@
-from django.db import models
-from django.contrib.auth.models import User
-from django.utils import timezone
-from datetime import date, datetime
-from django.dispatch import receiver
-from django.db.models.signals import post_save
 import uuid
+from datetime import date, datetime
+
+from django.contrib.auth.models import User
+from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.utils import timezone
 
 
 class Equipo(models.Model):
-    numero = models.CharField(max_length = 10, unique = False)
+    numero = models.CharField(max_length=10, unique=False)
     jefe = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    integrantes = models.ManyToManyField(User, related_name='equipos')   
+    integrantes = models.ManyToManyField(User, related_name="equipos")
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
-        ordering = ['-updated','-created']    
-    
+        ordering = ["-updated", "-created"]
+
     def __str__(self):
         return f"Equipo {self.numero} de {self.jefe.username}"
 
+
 class Proyecto(models.Model):
-    Tipo = [
-        ('personal', 'Personal'),
-        ('trabajo', 'Trabajo')
-    ]
+    Tipo = [("personal", "Personal"), ("trabajo", "Trabajo")]
     name = models.CharField(max_length=50)
     tutor = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE) 
-    tipo = models.CharField(max_length = 20, choices=Tipo)
+    equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE)
+    tipo = models.CharField(max_length=20, choices=Tipo)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
-        ordering = ['-updated','-created']    
-    
+        ordering = ["-updated", "-created"]
+
     def __str__(self):
         return self.name
 
+
 class Tarea(models.Model):
     Estado = [
-        ('pendiente', 'Pendiente'),
-        ('en_progreso', 'En_progreso'),
-        ('completada', 'Completada'),
-        ('pausada', 'Pausada')   
+        ("pendiente", "Pendiente"),
+        ("en_progreso", "En_progreso"),
+        ("completada", "Completada"),
+        ("pausada", "Pausada"),
     ]
-    
+
     contenido = models.TextField()
-    proyecto = models.ForeignKey(Proyecto, on_delete=models.CASCADE, related_name='tareas')  
-    estado = models.CharField(max_length=20, choices=Estado, default='pendiente')
-    asignado_a = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True)  
-    fecha_limite = models.DateTimeField(blank = True, null =True)
+    proyecto = models.ForeignKey(
+        Proyecto, on_delete=models.CASCADE, related_name="tareas"
+    )
+    estado = models.CharField(max_length=20, choices=Estado, default="pendiente")
+    asignado_a = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, blank=True
+    )
+    fecha_limite = models.DateTimeField(blank=True, null=True)
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
-        ordering = ['-updated','-created']
-    
+        ordering = ["-updated", "-created"]
+
     def __str__(self):
         return self.contenido[:20]
-    
+
     def esta_vencida(self):
         try:
-            if not self.fecha_limite or self.estado == 'completada':
+            if not self.fecha_limite or self.estado == "completada":
                 return False
-            
-            hoy = datetime.now().date() 
-            
+
+            hoy = datetime.now().date()
+
             if isinstance(self.fecha_limite, datetime):
                 fecha_lim = self.fecha_limite.date()
             else:
                 fecha_lim = self.fecha_limite
 
             return fecha_lim < hoy
-            
+
         except Exception:
             return False
-        
+
     def dias_para_vencer(self):
         try:
             if not self.fecha_limite:
                 return None
 
-            if self.estado == 'completada':
+            if self.estado == "completada":
                 return None
-            
+
             hoy = timezone.now().date()
-            
+
             if isinstance(self.fecha_limite, datetime):
                 fecha_lim = self.fecha_limite.date()
             else:
@@ -95,53 +99,60 @@ class Tarea(models.Model):
             dias = (fecha_lim - hoy).days
 
             return dias
-            
+
         except Exception as e:
-           # print(f'El error es {e}')
+            # print(f'El error es {e}')
             return None
-        
-            
+
 
 class Comentario(models.Model):
-    tarea = models.ForeignKey(Tarea, on_delete=models.CASCADE, related_name='comentarios') 
+    tarea = models.ForeignKey(
+        Tarea, on_delete=models.CASCADE, related_name="comentarios"
+    )
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     cuerpo = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
-    
+
     class Meta:
-        ordering = ['-created']
-  
+        ordering = ["-created"]
+
     def __str__(self):
-        return f'{self.user.username}: {self.cuerpo[:20]}'
-    
-    
+        return f"{self.user.username}: {self.cuerpo[:20]}"
+
+
 class Perfil(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, null = True, blank = True)
-    numero = models.CharField(max_length=50, blank = True, null =True, default='No registrado')
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
+    numero = models.CharField(
+        max_length=50, blank=True, null=True, default="No registrado"
+    )
     email = models.EmailField()
-    imagen = models.ImageField(upload_to = 'perfiles/',null = True, blank = True)
-    pais = models.CharField(max_length = 20, null = True, blank = True, default='No registrado')
-    rol = models.CharField(max_length = 50, default = 'usuario', null = True, blank = True)
+    imagen = models.ImageField(upload_to="perfiles/", null=True, blank=True)
+    pais = models.CharField(
+        max_length=20, null=True, blank=True, default="No registrado"
+    )
+    rol = models.CharField(max_length=50, default="usuario", null=True, blank=True)
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
-    
+
     def __str__(self):
-        return f'Perfil de: {self.user.username}'
+        return f"Perfil de: {self.user.username}"
+
 
 class Invitacion(models.Model):
     equipo = models.ForeignKey(Equipo, on_delete=models.CASCADE)
-    invitado = models.ForeignKey(User, on_delete=models.CASCADE, related_name = 'invitacion')
+    invitado = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name="invitacion"
+    )
     aceptada = models.BooleanField(default=False)
-    token = models.UUIDField(default = uuid.uuid4, editable = False, unique = True)
+    token = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     created = models.DateTimeField(auto_now_add=True)
-    
+
     class Meta:
-        verbose_name = 'Invitacion'
-        verbose_name_plural = 'Invitaciones'
-    
+        verbose_name = "Invitacion"
+        verbose_name_plural = "Invitaciones"
+
     def __str__(self):
-        return f'Invitacion del equipo {self.equipo.numero} para {self.invitado.username}'
-  
-    
-    
+        return (
+            f"Invitacion del equipo {self.equipo.numero} para {self.invitado.username}"
+        )
