@@ -12,14 +12,16 @@
 
 ## 📸 Screenshots
 
-<p align="center">
+<div align="center">
   <img src="screenshots/dashboard.png" alt="Dashboard" width="49%">
+
   <img src="screenshots/teams.png" alt="Equipos" width="49%">
-</p>
-<p align="center">
+</div>
+<div align="center">
   <img src="screenshots/task-comments.png" alt="Comentarios" width="49%">
+
   <img src="screenshots/profile-user.png" alt="Perfil" width="49%">
-</p>
+</div>
 
 ---
 
@@ -28,6 +30,7 @@
 Herramientas gratuitas como Trello son demasiado simples (sin control de permisos). Herramientas como Jira son caras ($15-30/usuario/mes) y complejas.
 
 **TaskFlow** ofrece:
+
 - ✅ Control de acceso estricto (cada usuario solo ve sus proyectos/tareas)
 - ✅ 4 roles jerárquicos (Admin, Jefe, Miembro, Invitado)
 - ✅ Sistema de invitaciones por email controlado
@@ -41,17 +44,20 @@ Herramientas gratuitas como Trello son demasiado simples (sin control de permiso
 ## ⚡ Features principales
 
 **Gestión colaborativa:**
+
 - CRUD completo de proyectos, equipos y tareas
 - Comentarios en tiempo real en cada tarea
 - Dashboard personalizado con resumen de actividad
 - Filtrado avanzado de tareas por proyecto, estado, asignado
 
 **Seguridad y permisos:**
+
 - Control granular basado en roles
 - Solo jefes de equipo pueden invitar miembros
 - Validación automática de asignaciones
 
 **Notificaciones:**
+
 - Emails automáticos al completar tareas (a todo el equipo)
 - Sistema de invitaciones por Gmail
 
@@ -70,6 +76,7 @@ Herramientas gratuitas como Trello son demasiado simples (sin control de permiso
 ## 🚀 Instalación local
 
 ### Requisitos
+
 - Python 3.10+
 - PostgreSQL 12+ (o SQLite para pruebas rápidas)
 
@@ -99,7 +106,7 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-Abre http://127.0.0.1:8000
+Abre <http://127.0.0.1:8000>
 
 ---
 
@@ -137,7 +144,7 @@ Proyecto de portfolio personal para demostrar habilidades en:
 
 Especializado en Python, Django, APIs REST y bases de datos.
 
-📧 amaurymonteagudop22@gmail.com  
+📧 <amaurymonteagudop22@gmail.com>  
 🔗 [GitHub](https://github.com/MauRyze22) | [LinkedIn](https://www.linkedin.com/in/amaury-monteagudo-40375b3a5)
 
 ---
