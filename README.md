@@ -110,6 +110,35 @@ Abre <http://127.0.0.1:8000>
 
 ---
 
+## 🐳 Deploy con Docker
+
+### Requisitos
+
+- Docker instalado y ejecutándose
+
+### 1. Configurar variables de entorno
+
+```bash
+cp .env.example .env
+# Edita .env con tus datos reales (SECRET_KEY, DB, email, etc.)
+```
+
+### 2. Crear la imagen
+
+```bash
+docker build -t taskflow .
+```
+
+### 3. Ejecutar el contenedor
+
+```bash
+docker run -d --env-file .env -p 8080:8080 --name taskflow_app taskflow
+```
+
+La app quedará disponible en <http://127.0.0.1:8080>
+
+---
+
 ## 📚 Estructura del proyecto
 
 ```
