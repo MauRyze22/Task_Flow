@@ -14,13 +14,11 @@
 
 <div align="center">
   <img src="screenshots/dashboard.png" alt="Dashboard" width="49%">
-
-  <img src="screenshots/teams.png" alt="Equipos" width="49%">
+  <img src="screenshots/profile-user.png" alt="Perfil" width="49%">
 </div>
 <div align="center">
   <img src="screenshots/task-comments.png" alt="Comentarios" width="49%">
-
-  <img src="screenshots/profile-user.png" alt="Perfil" width="49%">
+  <img src="screenshots/teams.png" alt="Equipos" width="49%">
 </div>
 
 ---
