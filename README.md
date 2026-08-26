@@ -52,8 +52,8 @@ Herramientas gratuitas como Trello son demasiado simples (sin control de permiso
 - Validación automática de asignaciones
 
 **Notificaciones:**
-- Emails automáticos al completar tareas (a todo el equipo)
-- Sistema de invitaciones por Gmail
+- Emails automáticos al completar tareas (a todo el equipo), enviados vía [Resend](https://resend.com) para garantizar entrega confiable en producción (evita el bloqueo de puerto SMTP que aplican la mayoría de los proveedores de hosting)
+- Sistema de invitaciones por email
 
 ---
 
@@ -62,6 +62,7 @@ Herramientas gratuitas como Trello son demasiado simples (sin control de permiso
 - **Backend:** Python 3.10+ | Django 4.2
 - **Base de datos:** PostgreSQL (producción) | SQLite (desarrollo)
 - **Frontend:** HTML5, CSS3, JavaScript, Bootstrap 5
+- **Emails transaccionales:** [Resend](https://resend.com) (API HTTPS, no SMTP)
 - **Deployment:** Railway | Gunicorn
 - **Otros:** Django Signals, ORM optimizado (`select_related`/`prefetch_related`)
 
@@ -72,6 +73,7 @@ Herramientas gratuitas como Trello son demasiado simples (sin control de permiso
 ### Requisitos
 - Python 3.10+
 - PostgreSQL 12+ (o SQLite para pruebas rápidas)
+- Cuenta gratuita en [Resend](https://resend.com) (para el envío de emails)
 
 ### Setup
 
@@ -89,7 +91,7 @@ pip install -r requirements.txt
 
 # Configurar variables de entorno
 cp .env.example .env
-# Edita .env con tus datos (DB, email, SECRET_KEY)
+# Edita .env con tus datos (DB, RESEND_API_KEY, SECRET_KEY)
 
 # Migraciones y superusuario
 python manage.py migrate
@@ -100,6 +102,8 @@ python manage.py runserver
 ```
 
 Abre http://127.0.0.1:8000
+
+> **Nota sobre emails:** con el plan gratuito de Resend y sin un dominio propio verificado, solo se pueden enviar correos a la dirección con la que te registraste en Resend. Para levantar el proyecto localmente basta con generar una API key en tu cuenta de Resend y usar ese mismo correo para las pruebas de invitación/notificación.
 
 ---
 
@@ -118,6 +122,12 @@ Task_Flow/
 
 ---
 
+## ⚠️ Limitaciones conocidas
+
+- **Envío de emails en modo sandbox:** el proyecto usa el dominio de pruebas de Resend por defecto, por lo que el envío de correos (invitaciones y notificaciones) está limitado a la dirección registrada en la cuenta de Resend usada. Para producción sin esta restricción, basta con verificar un dominio propio en el dashboard de Resend (registros DNS TXT/MX/CNAME) — no requiere cambios de código.
+
+---
+
 ## 🤝 Sobre este proyecto
 
 Proyecto de portfolio personal para demostrar habilidades en:
@@ -125,6 +135,7 @@ Proyecto de portfolio personal para demostrar habilidades en:
 ✓ Autenticación y autorización con roles personalizados  
 ✓ Optimización de queries (N+1 problem, eager loading)  
 ✓ Django Signals para eventos automáticos  
+✓ Integración con servicios externos de email transaccional (Resend)  
 ✓ Deployment en producción con PostgreSQL  
 
 **Feedback y sugerencias son bienvenidos** → [Abrir issue](https://github.com/MauRyze22/Task_Flow/issues)
