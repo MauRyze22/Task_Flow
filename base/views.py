@@ -26,13 +26,13 @@ def home(request):
         .distinct().order_by('-created')[0:10]
     tareas = Tarea.objects.filter(Q(proyecto__equipo__integrantes=request.user) |
                                   Q(asignado_a=request.user)).select_related('asignado_a', 'proyecto', 'proyecto__equipo').distinct()
-    
+
     invitaciones_pendientes = Invitacion.objects.filter(
         invitado=request.user,
         aceptada=False
     ).distinct()[:5]
-    
-    context = {'comentarios': comentarios, 'tareas': tareas, 'invitaciones_pendientes':invitaciones_pendientes}
+
+    context = {'comentarios': comentarios, 'tareas': tareas, 'invitaciones_pendientes': invitaciones_pendientes}
     return render(request, 'base/home.html', context)
 
 
@@ -52,8 +52,8 @@ def login_user(request):
         if user is not None:
             if not hasattr(user, 'perfil'):
                 Perfil.objects.create(
-                    user = user,
-                    email = user.email if user.email else ""
+                    user=user,
+                    email=user.email if user.email else ""
                 )
 
             login(request, user)
@@ -79,24 +79,26 @@ def register_user(request):
         if form.is_valid():
             request.session['numero'] = form.cleaned_data.get('numero')
             request.session['pais'] = form.cleaned_data.get('pais')
-            
+
             user = form.save(commit=False)
             user.username = user.username.lower()
             user.email = request.POST.get('email')
             user.save()
             login(request, user)
-            
+
             if hasattr(user, 'perfil'):
                 user.perfil.numero = request.session.get('numero')
                 user.perfil.pais = request.session.get('pais')
                 user.perfil.save()
-            
+
             del request.session['numero']
-            del request.session['pais']     
-                  
+            del request.session['pais']
+
             return redirect('home')
         else:
-            messages.error(request, "Formulario no valido")
+            for campo, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{campo}: {error}")
 
     context = {'form': form}
     return render(request, 'base/login.html', context)
@@ -105,8 +107,9 @@ def register_user(request):
 @login_required(login_url='login_user')
 def mostrar_profiles(request):
     perfiles = Perfil.objects.all()
-    context = {'perfiles':perfiles}
+    context = {'perfiles': perfiles}
     return render(request, 'base/perfiles.html', context)
+
 
 @login_required(login_url='login_user')
 def profile_user(request, pk):
@@ -139,7 +142,6 @@ def actualizar_profile(request, pk):
             perfil.save()
             return redirect('profile_user', request.user.id)
 
-    
     context = {'form': form}
     return render(request, 'base/profile_form.html', context)
 
@@ -170,13 +172,15 @@ def equipo_update(request, pk):
             form.save()
             return redirect('equipos')
         else:
-            messages.error(request, 'Los datos no son validos')
-    
+            for campo, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{campo}: {error}")
+
     if not request.user.is_staff:
         form.fields['integrantes'].queryset = User.objects.filter(
             id=request.user.id)
         form.fields['jefe'].queryset = User.objects.filter(id=request.user.id)
-        
+
     context = {'form': form, 'page': page, 'equipo': equipo}
     return render(request, 'base/equipo_form.html', context)
 
@@ -223,7 +227,9 @@ def create_equipo(request):
             messages.success(request, 'Equipo creado correctamente')
             return redirect('equipos')
         else:
-            messages.error(request, 'Los datos son erroneos')
+            for campo, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{campo}: {error}")
 
     if not request.user.is_staff:
         form.fields['integrantes'].queryset = User.objects.filter(
@@ -268,7 +274,9 @@ def create_proyecto(request):
             form.save()
             return redirect('proyectos')
         else:
-            messages.error(request, 'Los datos son erroneos')
+            for campo, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{campo}: {error}")
 
     if not request.user.is_staff:
         form.fields['equipo'].queryset = Equipo.objects.filter(
@@ -302,7 +310,11 @@ def proyecto_update(request, pk):
         if form.is_valid():
             form.save()
             return redirect('proyectos')
-        
+        else:
+            for campo, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{campo}: {error}")
+
     if not request.user.is_staff:
         form.fields['equipo'].queryset = Equipo.objects.filter(
             jefe=request.user).select_related('jefe')
@@ -382,7 +394,9 @@ def create_tarea(request):
             form.save()
             return redirect('tareas')
         else:
-            messages.error(request, 'Los datos son erroneos')
+            for campo, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{campo}: {error}")
 
     if not request.user.is_staff:
         form.fields['asignado_a'].queryset = User.objects.filter(
@@ -418,7 +432,11 @@ def tarea_update(request, pk):
         if form.is_valid():
             form.save()
             return redirect('tareas')
-        
+        else:
+            for campo, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{campo}: {error}")
+
     if not request.user.is_staff:
         form.fields['asignado_a'].queryset = User.objects.filter(
             id=request.user.id)
@@ -471,7 +489,9 @@ def create_comentario(request):
             comentario.save()
             return redirect('comentarios')
         else:
-            messages.error(request, 'Los datos son erroneos')
+            for campo, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{campo}: {error}")
 
     if not request.user.is_staff:
         form.fields['tarea'].queryset = Tarea.objects.filter(Q(asignado_a=request.user) |
@@ -494,7 +514,11 @@ def comentario_update(request, pk):
         if form.is_valid():
             form.save()
             return redirect('comentarios')
-        
+        else:
+            for campo, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{campo}: {error}")
+
     if not request.user.is_staff:
         form.fields['tarea'].queryset = Tarea.objects.filter(Q(asignado_a=request.user) |
                                                              Q(proyecto__equipo__integrantes=request.user)
@@ -521,46 +545,46 @@ def comentario_delete(request, pk):
 
 @login_required(login_url='login_user')
 def enviar_invitacion(request, pk):
-    invitado = get_object_or_404(User, id = pk)
+    invitado = get_object_or_404(User, id=pk)
     form = InvitacionForm()
-    mis_equipos = Equipo.objects.filter(jefe = request.user).select_related('jefe')
-    
+    mis_equipos = Equipo.objects.filter(jefe=request.user).select_related('jefe')
+
     if not mis_equipos.exists():
         messages.error(request, 'No tienes equipos donde seas jefe')
-        return redirect('profile_user', pk = pk)
-    
+        return redirect('profile_user', pk=pk)
+
     if request.method == 'POST':
         equipo_id = request.POST.get('equipo')
         form = InvitacionForm(request.POST)
         if form.is_valid():
-        
+
             if not equipo_id:
                 messages.error(request, 'Debe seleccionar un equipo')
-                return redirect('enviar_invitacion', pk = pk)
-            
+                return redirect('enviar_invitacion', pk=pk)
+
             try:
-                equipo = get_object_or_404(Equipo, id = equipo_id, jefe = request.user)
+                equipo = get_object_or_404(Equipo, id=equipo_id, jefe=request.user)
             except Equipo.DoesNotExist:
                 messages.error(request, 'Este equipo no existe')
-                return redirect('enviar_invitacion', pk = pk)        
+                return redirect('enviar_invitacion', pk=pk)
 
             if invitado in equipo.integrantes.all():
                 messages.error(request, 'Este usuario ya esta en el equipo')
-                return redirect('profile_user', pk = pk)
-            
+                return redirect('profile_user', pk=pk)
+
             if request.user != equipo.jefe:
                 messages.error(request, 'No eres jefe de este equipo')
-                return redirect('profile_user', pk = pk)
-                
-            invitacion = form.save(commit = False)
+                return redirect('profile_user', pk=pk)
+
+            invitacion = form.save(commit=False)
             invitacion.invitado = invitado
-            invitacion.equipo = equipo 
+            invitacion.equipo = equipo
             invitacion.save()
             accept_url = request.build_absolute_uri(reverse('aceptar_invitacion', kwargs={'token': invitacion.token}))
-                
+
             if invitado.email:
                 subject = f'Hola {invitado.username}'
-                text =(
+                text = (
                         f'Hola {invitado.username},\n\n'
                         f'Usted ha sido invitado al equipo {equipo.numero} por {request.user.username}.\n\n'
                         f'Si desea aceptar, haga clic en el siguiente enlace:\n'
@@ -568,36 +592,37 @@ def enviar_invitacion(request, pk):
                         f'Saludos,\n'
                         f'TaskFlow'
                         )
-                resend.Emails.send({'subject':subject, 'text':text, 'from':'SupportFlow <onboarding@resend.dev>', 'to': [invitado.email]})
-                    
+                resend.Emails.send({'subject': subject, 'text': text, 'from': 'SupportFlow <onboarding@resend.dev>', 'to': [invitado.email]})
+
                 messages.success(request, 'Invitacion enviada correctamente')
-                return redirect('profile_user', pk = pk)
-            
+                return redirect('profile_user', pk=pk)
+
             else:
                 messages.warning(request, f'{invitado.username} no tiene email registrado')
         else:
-            messages.error(request, 'Formulario no valido')
-            
-    if not request.user.is_staff:       
-        form.fields['equipo'].queryset = Equipo.objects.filter(jefe = request.user)
-    context = {'form':form}
+            for campo, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{campo}: {error}")
+
+    if not request.user.is_staff:
+        form.fields['equipo'].queryset = Equipo.objects.filter(jefe=request.user)
+    context = {'form': form}
     return render(request, 'base/enviar_invitacion.html', context)
 
 
 def aceptar_invitacion(request, token):
     invitacion = get_object_or_404(Invitacion, token=token, aceptada=False)
-    
+
     if request.user != invitacion.invitado:
         return HttpResponseForbidden("No te corresponde esta invitacion")
-    
+
     if request.method == 'POST':
         invitacion.equipo.integrantes.add(invitacion.invitado)
         invitacion.aceptada = True
         invitacion.save()
-        
+
         messages.success(request, f'Te has unido al equipo {invitacion.equipo.numero} de {invitacion.equipo.jefe.username}')
         return redirect('equipos')
-    
-    context = {'invitacion':invitacion, 'equipo':invitacion.equipo}
+
+    context = {'invitacion': invitacion, 'equipo': invitacion.equipo}
     return render(request, 'base/aceptar_invitacion.html', context)
-        
